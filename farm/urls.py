@@ -6,7 +6,7 @@ from .views import (
     FarmListCreateView, FarmDetailView,
     MotorListCreateView, MotorDetailView,
     ValveListCreateView, ValveDetailView,
-    UserFarmsView,FarmMotorsView
+    UserFarmsView, FarmMotorsView, MotorToggleView, FarmMotorValveView
 )
 
 urlpatterns = [
@@ -24,10 +24,11 @@ urlpatterns = [
     path("farm-management/", TemplateView.as_view(template_name ='create_farm.html'), name='create_farm_page'),
     #userfarmview
     path('my-farms/', UserFarmsView.as_view(), name='user-farms'),
-
-    # farm/urls.py
-
+    path('motors/<int:motor_id>/toggle/', MotorToggleView.as_view(), name='motor-toggle'),
     path('farms/<int:farm_id>/motors/', FarmMotorsView.as_view(), name='farm-motors'),
+
+    path('farms/<int:farm_id>/motors/<int:motor_id>/valves/', FarmMotorValveView.as_view(), name='farm-motor-valves'),
+
 ]
 
 

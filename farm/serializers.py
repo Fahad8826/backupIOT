@@ -23,19 +23,27 @@ class ValveSerializer(serializers.ModelSerializer):
         return data
 
 
+# serializers.py
 class MotorSerializer(serializers.ModelSerializer):
     valves = ValveSerializer(many=True, read_only=True)
 
     class Meta:
         model = Motor
-        fields = ['id', 'motor_type', 'valve_count', 'valves', 'farm',"UIN"]
+        fields = ['id', 'motor_type', 'valve_count', 'valves', 'farm', 'UIN', 'is_active']
         extra_kwargs = {
-            'farm': {'required': False}  # Make farm optional during creation
+            'farm': {'required': False}
         }
 
+    def validate_UIN(self, value):
+        if value is not None:  # Only validate if UIN is provided
+            if Motor.objects.filter(UIN=value).exclude(id=self.instance.id if self.instance else None).exists():
+                raise serializers.ValidationError("A motor with this UIN already exists.")
+        return value
+
     def validate(self, data):
-        motor_type = data.get('motor_type')
-        valve_count = data.get('valve_count')
+        motor_type = data.get('motor_type', self.instance.motor_type if self.instance else None)
+        valve_count = data.get('valve_count', self.instance.valve_count if self.instance else None)
+        is_active = data.get('is_active', self.instance.is_active if self.instance else False)
 
         max_valves = {
             'single_phase': 4,
@@ -47,6 +55,24 @@ class MotorSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 f"{motor_type} cannot have more than {max_valves[motor_type]} valves"
             )
+
+        # If updating and turning on motor, check valve status
+        if self.instance and is_active and not self.instance.valves.filter(is_active=True).exists():
+            raise serializers.ValidationError(
+                "Motor cannot be turned on unless at least one valve is active."
+            )
+
+        return data
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['is_active'] = 1 if instance.is_active else 0
+        return ret
+
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+        if 'is_active' in data:
+            data['is_active'] = bool(data['is_active'])
         return data
 
 
