@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .valve-btn {
+            width: 80px;
+            margin: 5px;
+        }
+        .motor-card {
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
+        }
+        .status-green {
+            background-color: #28a745;
+        }
+        .status-gray {
+            background-color: #6c757d;
+        }
+        .valve-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Motor Control System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="createMotorBtn">Add New Motor</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/logout/">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Motor Dashboard</h1>
+
+        <div class="row mt-4" id="motorContainer">
+            <!-- Motors will be loaded here via AJAX -->
+            <div class="col-12 text-center" id="loadingIndicator">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Motor Modal -->
+    <div class="modal fade" id="createMotorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Motor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createMotorForm">
+                        <div class="mb-3">
+                            <label for="motorName" class="form-label">Motor Name</label>
+                            <input type="text" class="form-control" id="motorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="motorUIN" class="form-label">UIN</label>
+                            <input type="text" class="form-control" id="motorUIN" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="motorType" class="form-label">Type</label>
+                            <select class="form-select" id="motorType">
+                                <option value="REQ">Required</option>
+                                <option value="OPT">Optional</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="motorVCOUNT" class="form-label">Valve Count</label>
+                            <input type="number" class="form-control" id="motorVCOUNT" min="0" max="10" value="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="motorSTATUS" class="form-label">Status</label>
+                            <select class="form-select" id="motorSTATUS">
+                                <option value="1">Working</option>
+                                <option value="0">Idle</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveMotorBtn">Save Motor</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrfToken = getCookie('csrftoken');
+
+        // Set up AJAX headers
+        $.ajaxSetup({
+            headers: {
+                'X-CSRFToken': csrfToken
+            }
+        });
+
+        // Load motors on page load
+        $(document).ready(function() {
+            loadMotors();
+
+            // Initialize modals
+            const createMotorModal = new bootstrap.Modal(document.getElementById('createMotorModal'));
+
+            // Create motor button
+            $('#createMotorBtn').click(function() {
+                createMotorModal.show();
+            });
+
+            // Save motor
+            $('#saveMotorBtn').click(function() {
+                const motorData = {
+                    name: $('#motorName').val(),
+                    UIN: $('#motorUIN').val(),
+                    TYPE: $('#motorType').val(),
+                    VCOUNT: parseInt($('#motorVCOUNT').val()),
+                    STATUS: $('#motorSTATUS').val()
+                };
+
+                $.ajax({
+                    url: 'motor/api/motors/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(motorData),
+                    success: function(response) {
+                        createMotorModal.hide();
+                        $('#createMotorForm')[0].reset();
+                        loadMotors();
+
+                        // If motor has valves, initialize them
+                        if (response.VCOUNT > 0) {
+                            initializeValves(response.id);
+                        }
+                    },
+                    error: function(error) {
+                        alert('Error creating motor: ' + JSON.stringify(error.responseJSON));
+                    }
+                });
+            });
+        });
+
+        // Load all motors
+        function loadMotors() {
+            $('#loadingIndicator').show();
+
+            $.ajax({
+                url: 'motor/api/motors/',
+                type: 'GET',
+                success: function(motors) {
+                    $('#loadingIndicator').hide();
+                    $('#motorContainer').empty();
+
+                    if (motors.length === 0) {
+                        $('#motorContainer').html('<div class="col-12"><div class="alert alert-info">No motors found. Click "Add New Motor" to create one.</div></div>');
+                        return;
+                    }
+
+                    motors.forEach(function(motor) {
+                        appendMotorCard(motor);
+                    });
+                },
+                error: function(error) {
+                    $('#loadingIndicator').hide();
+                    $('#motorContainer').html('<div class="col-12"><div class="alert alert-danger">Error loading motors.</div></div>');
+                    console.error('Error loading motors:', error);
+                }
+            });
+        }
+
+        // Append motor card to container
+        function appendMotorCard(motor) {
+            const statusColorClass = motor.status_color === 'green' ? 'status-green' : 'status-gray';
+
+            const motorCard = `
+                <div class="col-md-6 col-lg-4 motor-card">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">${motor.name}</h5>
+                            <span class="status-badge ${statusColorClass}">${motor.status_display}</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>UIN:</strong> ${motor.UIN}</p>
+                            <p><strong>Type:</strong> ${motor.type_display}</p>
+                            <p><strong>Valve Count:</strong> ${motor.VCOUNT}</p>
+                            <p><strong>Created:</strong> ${new Date(motor.created_at).toLocaleString()}</p>
+
+                            <div class="valve-container" id="valves-${motor.id}">
+                                ${motor.valves.length > 0 ? '' : '<button class="btn btn-primary btn-sm init-valves-btn" data-motor-id="' + motor.id + '">Initialize Valves</button>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#motorContainer').append(motorCard);
+
+            // If motor has valves, render them
+            if (motor.valves.length > 0) {
+                renderValves(motor.id, motor.valves);
+            } else {
+                // Add event listener for initialize valves button
+                $(document).on('click', `.init-valves-btn[data-motor-id="${motor.id}"]`, function() {
+                    initializeValves(motor.id);
+                });
+            }
+        }
+
+        // Initialize valves for a motor
+        function initializeValves(motorId) {
+            $.ajax({
+                url: `motor/api/motors/${motorId}/initialize_valves/`,
+                type: 'POST',
+                success: function(valves) {
+                    renderValves(motorId, valves);
+                },
+                error: function(error) {
+                    alert('Error initializing valves: ' + JSON.stringify(error.responseJSON));
+                }
+            });
+        }
+
+        // Render valves for a motor
+        function renderValves(motorId, valves) {
+            const valveContainer = $(`#valves-${motorId}`);
+            valveContainer.empty();
+
+            valves.forEach(function(valve) {
+                const valveButton = `
+                    <button class="btn ${valve.value === '1' ? 'btn-success' : 'btn-secondary'} valve-btn"
+                            data-valve-id="${valve.id}"
+                            data-valve-status="${valve.value}">
+                        Valve ${valve.valve_number}
+                    </button>
+                `;
+
+                valveContainer.append(valveButton);
+            });
+
+            // Add event listeners for valve buttons
+            valveContainer.find('.valve-btn').click(function() {
+                const valveId = $(this).data('valve-id');
+                toggleValve(valveId);
+            });
+        }
+
+        // Toggle valve status
+        function toggleValve(valveId) {
+            $.ajax({
+                url: `motor/api/valves/${valveId}/toggle/`,
+                type: 'POST',
+                success: function(response) {
+                    const valve = response.valve;
+                    const button = $(`.valve-btn[data-valve-id="${valve.id}"]`);
+
+                    // Update button appearance
+                    if (valve.value === '1') {
+                        button.removeClass('btn-secondary').addClass('btn-success');
+                    } else {
+                        button.removeClass('btn-success').addClass('btn-secondary');
+                    }
+
+                    button.data('valve-status', valve.value);
+                },
+                error: function(error) {
+                    alert('Error toggling valve: ' + JSON.stringify(error.responseJSON));
+                }
+            });
+        }
+    </script>
+</body>
+</html>

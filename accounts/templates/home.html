@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        /* Drawer Styles */
+        .drawer {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            background-color: #2c3e50;
+            overflow-x: hidden;
+            transition: 0.3s;
+            padding-top: 20px;
+            z-index: 1000;
+        }
+
+        .drawer.open {
+            left: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .drawer-header h2 {
+            color: #ecf0f1;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .drawer-close {
+            color: #ecf0f1;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .drawer a {
+            display: block;
+            padding: 15px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .drawer a:hover {
+            background-color: #34495e;
+        }
+
+        .drawer a i {
+            margin-right: 10px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .header button {
+            background-color: #2980b9;
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .header button:hover {
+            background-color: #1c5980;
+        }
+
+        /* Content Styles */
+        .content {
+            margin-left: 0;
+            padding: 20px;
+            transition: 0.3s;
+        }
+
+        .content.shifted {
+            margin-left: 250px;
+        }
+
+        .dashboard-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .dashboard-card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .dashboard-card p {
+            color: #34495e;
+        }
+    </style>
+</head>
+<body>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <h2>Navigation</h2>
+            <span class="drawer-close" onclick="toggleDrawer()">&times;</span>
+        </div>
+        <a href="#"><i>📊</i> Dashboard</a>
+        <a href="{% url 'users_managment' %}"><i>👥</i> Add Users</a>
+        <a href="{% url 'create_farm_page' %}"><i>📝</i> Add Farm</a>
+
+        <a href=""><i>📝</i> Add Project</a>
+        <a href="#"><i>⚙️</i> Settings</a>
+        <a href="#"><i>📈</i> Analytics</a>
+    </div>
+
+    <div class="header">
+        <div style="display: flex; align-items: center;">
+            <button class="menu-btn" onclick="toggleDrawer()">☰</button>
+            <h1>Admin Dashboard</h1>
+        </div>
+        <button id="admin-signup" onclick="navigateToAdminSignup()">Create New Admin</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="content" class="content">
+        <div class="dashboard-card">
+            <h2>Welcome to the Admin Panel</h2>
+            <p>Login successful!</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Check authentication on page load
+        $(document).ready(function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/adminpage';
+                return;
+            }
+
+            // Add token to all AJAX requests by default
+            $.ajaxSetup({
+                headers: {
+                    'Authorization': 'Token ' + token
+                }
+            });
+        });
+
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const content = document.getElementById('content');
+            drawer.classList.toggle('open');
+            content.classList.toggle('shifted');
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/adminpage';
+        }
+
+        function navigateToAdminSignup() {
+            window.location.href = '/admin-signup';
+        }
+    </script>
+</body>
+</html>
