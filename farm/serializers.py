@@ -111,12 +111,38 @@ class FarmSerializer(serializers.ModelSerializer):
 
         # If motors are provided, update them
         if motors_data is not None:
-            # First, remove existing motors
-            instance.motors.all().delete()
+            # Get IDs of motors in the form submission
+            submitted_motor_ids = []
+            new_motors = []
 
-            # Create new motors
+            # First, update existing motors and collect new ones
             for motor_data in motors_data:
+                motor_id = motor_data.get('id')
+
+                if motor_id and motor_id != '':
+                    # This is an existing motor - update it
+                    try:
+                        motor = Motor.objects.get(id=motor_id, farm=instance)
+                        for key, value in motor_data.items():
+                            if key != 'id' and key != 'farm':
+                                setattr(motor, key, value)
+                        motor.save()
+                        submitted_motor_ids.append(motor_id)
+                    except Motor.DoesNotExist:
+                        # Motor ID doesn't exist or doesn't belong to this farm
+                        new_motors.append(motor_data)
+                else:
+                    # This is a new motor
+                    new_motors.append(motor_data)
+
+            # Now create any new motors
+            for motor_data in new_motors:
                 motor_data['farm'] = instance
-                Motor.objects.create(**motor_data)
+                new_motor = Motor.objects.create(**motor_data)
+                submitted_motor_ids.append(new_motor.id)
+
+            # Delete motors that weren't in the submitted data
+            if submitted_motor_ids:
+                instance.motors.exclude(id__in=submitted_motor_ids).delete()
 
         return instance

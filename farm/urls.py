@@ -36,8 +36,8 @@ from .views import (
     FarmListCreateView, FarmDetailView,
     MotorListCreateView, MotorDetailView,
     ValveListCreateView, ValveDetailView,
-    UserFarmsView,  FarmMotorUpdateView, FarmMotorValveUpdateView,
-    FarmMotorsListView  # ✅ Add this new view for listing motors in a farm
+    UserFarmsView, FarmMotorUpdateView, FarmMotorValveUpdateView,
+    FarmMotorsListView, CheckUINView  # ✅ Add this new view for listing motors in a farm
 )
 
 urlpatterns = [
@@ -70,5 +70,7 @@ urlpatterns = [
 
     # ✅ Update a specific valve's status
     path('farms/<int:farm_id>/motors/<int:motor_id>/valves/<int:valve_id>/update/', FarmMotorValveUpdateView.as_view(), name='farm-motor-valve-update'),
+
+path('check-uin/', CheckUINView.as_view(), name='check-uin'),
 ]
 
