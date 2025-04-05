@@ -24,19 +24,22 @@ urlpatterns = [
     # Farm management page (HTML template view)
     path("farm-management/", TemplateView.as_view(template_name='create_farm.html'), name='create_farm_page'),
 
+
+
+
     # User Farms
     path('my-farms/', UserFarmsView.as_view(), name='user-farms'),
 
     # Motor toggle
     # path('motors/<int:motor_id>/toggle/', MotorToggleView.as_view(), name='motor-toggle'),
 
-    # ✅ List motors of a specific farm
+    # List motors of a specific farm
     path('farms/<int:farm_id>/motors/', FarmMotorsListView.as_view(), name='farm-motors-list'),
 
-    # ✅ Update a specific motor's status
+    #  Update a specific motor's status
     path('farms/<int:farm_id>/motors/<int:motor_id>/updation/', FarmMotorUpdateView.as_view(), name='farm-motor-update'),
 
-    # ✅ Update a specific valve's status
+    #  Update a specific valve's status
     path('farms/<int:farm_id>/motors/<int:motor_id>/valves/<int:valve_id>/update/', FarmMotorValveUpdateView.as_view(), name='farm-motor-valve-update'),
 ]
 

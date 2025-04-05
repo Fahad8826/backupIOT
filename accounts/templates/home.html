@@ -738,73 +738,86 @@
         }
 
         function saveFarm() {
-            const farmId = $('#farm-edit-id').val();
-            const motors = [];
+    const farmId = $('#farm-edit-id').val();
+    const motors = [];
 
-            let hasError = false;
-            $('#motor-inputs .motor-input').each(function() {
-                const motorUIN = $(this).find('input[id^="UIN-"]').val();
-                const motorType = $(this).find('select[id^="motor-type-"]').val();
-                const valveCount = parseInt($(this).find('input[id^="valve-count-"]').val());
-                const motorId = $(this).find('input[id^="motor-id-"]').val();
+    let hasError = false;
+    $('#motor-inputs .motor-input').each(function() {
+        const motorId = $(this).find('input[id^="motor-id-"]').val();
+        const motorUIN = $(this).find('input[id^="UIN-"]').val();
+        const motorType = $(this).find('select[id^="motor-type-"]').val();
+        const valveCount = parseInt($(this).find('input[id^="valve-count-"]').val());
 
-                if (isNaN(valveCount) || valveCount < 1) {
-                    showNotification('Please enter a valid valve count', 'error');
-                    hasError = true;
-                    return false;
-                }
+        if (isNaN(valveCount) || valveCount < 1) {
+            showNotification('Please enter a valid valve count', 'error');
+            hasError = true;
+            return false;
+        }
 
-                // Create motor object based on whether it's an update or new creation
-                const motorObject = {
-                    motor_type: motorType,
-                    valve_count: valveCount
-                };
+        // Create motor object with all fields
+        const motorObject = {
+            motor_type: motorType,
+            valve_count: valveCount
+        };
 
-                // Only include UIN for new motors (POST requests)
-                if (!farmId) {
-                    motorObject.UIN = motorUIN;
-                }
+        // Include ID for existing motors
+        if (motorId) {
+            motorObject.id = motorId;
+        }
 
-                // Include ID for existing motors
-                if (motorId) {
-                    motorObject.id = motorId;
-                }
+        // Include UIN field always (can be empty string or valid UIN)
+        // This allows backend to receive UIN updates or nulls
+        motorObject.UIN = motorUIN || null;
 
-                motors.push(motorObject);
-            });
+        motors.push(motorObject);
+    });
 
-            if (hasError) return;
-            if (motors.length === 0) {
-                showNotification('Please add at least one motor', 'error');
-                return;
+    if (hasError) return;
+    if (motors.length === 0) {
+        showNotification('Please add at least one motor', 'error');
+        return;
+    }
+
+    const farmData = {
+        name: $('#farm-name').val() || 'Unnamed Farm',
+        location: $('#farm-location').val() || 'Unknown Location',
+        owner: parseInt($('#farm-owner').val()),
+        motors: motors
+    };
+
+    const method = farmId ? 'PUT' : 'POST';
+    const url = farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`;
+
+    $.ajax({
+        url: url,
+        method: method,
+        contentType: 'application/json',
+        data: JSON.stringify(farmData),
+        success: function(response) {
+            showNotification(`Farm ${farmId ? 'updated' : 'created'} with ID: ${response.id}`);
+            resetFarmForm();
+            showSection('farm-list');
+            listFarms();
+        },
+        error: function(xhr) {
+            const errorResponse = JSON.parse(xhr.responseText);
+            let errorMessage = 'Error saving farm: ';
+
+            // Handle specific error messages
+            if (errorResponse.motors && Array.isArray(errorResponse.motors)) {
+                errorResponse.motors.forEach((motorError, index) => {
+                    if (motorError.UIN) {
+                        errorMessage += `Motor #${index+1}: ${motorError.UIN[0]} `;
+                    }
+                });
+            } else {
+                errorMessage += xhr.responseText;
             }
 
-            const farmData = {
-                name: $('#farm-name').val() || 'Unnamed Farm',
-                location: $('#farm-location').val() || 'Unknown Location',
-                owner: parseInt($('#farm-owner').val()),
-                motors: motors
-            };
-
-            const method = farmId ? 'PUT' : 'POST';
-            const url = farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`;
-
-            $.ajax({
-                url: url,
-                method: method,
-                contentType: 'application/json',
-                data: JSON.stringify(farmData),
-                success: function(response) {
-                    showNotification(`Farm ${farmId ? 'updated' : 'created'} with ID: ${response.id}`);
-                    resetFarmForm();
-                    showSection('farm-list');
-                    listFarms();
-                },
-                error: function(xhr) {
-                    showNotification('Error saving farm: ' + xhr.responseText, 'error');
-                }
-            });
+            showNotification(errorMessage, 'error');
         }
+    });
+}
 
         function resetFarmForm() {
             $('#farm-edit-id').val('');

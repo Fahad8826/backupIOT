@@ -22,7 +22,7 @@ class Motor(models.Model):
     farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='motors')
     motor_type = models.CharField(max_length=20, choices=MOTOR_TYPES)
     valve_count = models.PositiveIntegerField()
-    UIN = models.PositiveIntegerField(null=True, unique=True)
+    UIN = models.PositiveIntegerField(null=True)
     is_active = models.BooleanField(default=False)  # New field
 
     def clean(self):
