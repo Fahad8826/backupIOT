@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Signup</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .success {
+            color: green;
+            margin-top: 15px;
+        }
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #4CAF50;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            // Check if admin exists to show appropriate form
+            const adminExists = {{ admin_exists|lower }};
+            const isAdmin = {{ is_admin|lower }};
+
+            if (adminExists && !isAdmin) {
+                $('#admin-signup-container').hide();
+                $('#login-prompt').show();
+            } else if (!adminExists) {
+                $('#super-admin-form').show();
+                $('#regular-admin-form').hide();
+            } else {
+                $('#super-admin-form').hide();
+                $('#regular-admin-form').show();
+            }
+
+            // Super admin form submission
+            $('#super-admin-form').submit(function(e) {
+                e.preventDefault();
+
+                const email = $('#super-email').val();
+                const username = $('#super-username').val();
+                const password = $('#super-password').val();
+                const confirmPassword = $('#super-confirm-password').val();
+                const masterPassword = $('#master-password').val();
+
+                if (password !== confirmPassword) {
+                    $('#super-error').text('Passwords do not match');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/admin/super-signup/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: email,
+                        username: username,
+                        password: password,
+                        master_password: masterPassword
+                    }),
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        $('#super-success').text('Super admin created successfully');
+                        localStorage.setItem('adminToken', response.token);
+                        setTimeout(function() {
+                            window.location.href = '/admin-dashboard/';
+                        }, 2000);
+                    },
+                    error: function(xhr) {
+                        $('#super-error').text('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+                    }
+                });
+            });
+
+            // Regular admin form submission
+            $('#regular-admin-form').submit(function(e) {
+                e.preventDefault();
+
+                const email = $('#email').val();
+                const username = $('#username').val();
+                const password = $('#password').val();
+                const confirmPassword = $('#confirm-password').val();
+
+                if (password !== confirmPassword) {
+                    $('#error').text('Passwords do not match');
+                    return;
+                }
+
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    $('#error').text('You must be logged in as admin');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/admin/signup/',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        email: email,
+                        username: username,
+                        password: password
+                    }),
+                    headers: {
+                        'Authorization': 'Token ' + token,
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    success: function(response) {
+                        $('#success').text('Admin created successfully');
+                        $('#email').val('');
+                        $('#username').val('');
+                        $('#password').val('');
+                        $('#confirm-password').val('');
+                    },
+                    error: function(xhr) {
+                        $('#error').text('Error: ' + (xhr.responseJSON ? xhr.responseJSON.error : 'Unknown error'));
+                    }
+                });
+            });
+
+            // Function to get CSRF token from cookies
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container" id="admin-signup-container">
+        <h1>Admin Signup</h1>
+
+        <!-- Super Admin Form (First Admin) -->
+        <form id="super-admin-form" style="display: none;">
+            <div class="form-group">
+                <label for="super-email">Email:</label>
+                <input type="email" id="super-email" required>
+            </div>
+            <div class="form-group">
+                <label for="super-username">Username (Optional):</label>
+                <input type="text" id="super-username">
+            </div>
+            <div class="form-group">
+                <label for="super-password">Password:</label>
+                <input type="password" id="super-password" required>
+            </div>
+            <div class="form-group">
+                <label for="super-confirm-password">Confirm Password:</label>
+                <input type="password" id="super-confirm-password" required>
+            </div>
+            <div class="form-group">
+                <label for="master-password">Master Password:</label>
+                <input type="password" id="master-password" required>
+            </div>
+            <button type="submit">Create Super Admin</button>
+            <div id="super-error" class="error"></div>
+            <div id="super-success" class="success"></div>
+        </form>
+
+        <!-- Regular Admin Form (Additional Admins) -->
+        <form id="regular-admin-form">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="username">Username (Optional):</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" required>
+            </div>
+            <button type="submit">Create Admin</button>
+            <div id="error" class="error"></div>
+            <div id="success" class="success"></div>
+        </form>
+
+        <div class="toggle-form">
+            <a href="/adminpage">Back to Login</a>
+        </div>
+    </div>
+
+    <!-- Login Prompt (If not logged in as admin) -->
+    <div class="container" id="login-prompt" style="display: none;">
+        <h1>Admin Access Required</h1>
+        <p>You need to be logged in as an admin to create new admin accounts.</p>
+        <div class="toggle-form">
+            <a href="/adminpage">Go to Admin Login</a>
+        </div>
+    </div>
+</body>
+</html>

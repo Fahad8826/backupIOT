@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm & User Management Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-dark: #2980b9;
+            --secondary: #2c3e50;
+            --secondary-light: #34495e;
+            --bg-light: #f4f4f9;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* Drawer Styles */
+        .drawer {
+            height: 100%;
+            width: 280px;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            background-color: var(--secondary);
+            overflow-x: hidden;
+            transition: var(--transition);
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .drawer.open {
+            left: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: var(--primary);
+        }
+
+        .drawer-header h2 {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .drawer-close {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .drawer-close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .drawer-user {
+            padding: 15px 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            color: var(--text-light);
+        }
+
+        .drawer-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .drawer-links {
+            padding: 10px 0;
+        }
+
+        .drawer-category {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            padding: 15px 20px 5px;
+        }
+
+        .drawer button.nav-btn {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .drawer button.nav-btn:hover, .drawer button.nav-btn.active {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left-color: var(--primary);
+        }
+
+        .drawer button.nav-btn i {
+            width: 24px;
+            margin-right: 15px;
+            text-align: center;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 70px;
+            background-color: #fff;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            margin-right: 15px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .menu-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-dark);
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .header-btn i {
+            font-size: 1rem;
+        }
+
+        .header-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .primary-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Content Styles */
+        .content {
+            margin-left: 0;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .content.shifted {
+            margin-left: 280px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .stats-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stats-title {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .stats-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stats-value {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .blue-icon {
+            background-color: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .green-icon {
+            background-color: rgba(46, 204, 113, 0.1);
+            color: #2ecc71;
+        }
+
+        .orange-icon {
+            background-color: rgba(230, 126, 34, 0.1);
+            color: #e67e22;
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-container input, .form-container select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .table-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table th {
+            background-color: #f8f9fa;
+        }
+
+        .table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            color: white;
+            display: none;
+            z-index: 2000;
+        }
+
+        .notification.success {
+            background-color: #2ecc71;
+        }
+
+        .notification.error {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <h2>Management Dashboard</h2>
+            <span class="drawer-close" onclick="toggleDrawer()">
+                <i class="fas fa-times"></i>
+            </span>
+        </div>
+        <div class="drawer-user">
+            <div class="drawer-user-avatar">A</div>
+            <div>
+                <div>Admin User</div>
+                <small>Administrator</small>
+            </div>
+        </div>
+        <div class="drawer-links">
+            <div class="drawer-category">General</div>
+            <button id="dashboard-btn" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</button>
+
+            <div class="drawer-category">Farm Management</div>
+            <button id="create-farm-btn" class="nav-btn"><i class="fas fa-plus"></i> Create Farm</button>
+            <button id="farm-list-btn" class="nav-btn"><i class="fas fa-list"></i> Farm List</button>
+            <button id="farm-details-btn" class="nav-btn"><i class="fas fa-info-circle"></i> Farm Details</button>
+
+            <div class="drawer-category">User Management</div>
+            <button id="user-list-btn" class="nav-btn"><i class="fas fa-users"></i> User List</button>
+            <button id="create-user-btn" class="nav-btn"><i class="fas fa-user-plus"></i> Create User</button>
+
+            <div class="drawer-category">System</div>
+            <button class="nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleDrawer()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>Management Dashboard</h1>
+        </div>
+        <div class="header-right">
+            <button class="header-btn primary-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+
+    <div id="content" class="content">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section active">
+            <div class="dashboard-grid">
+                <div class="dashboard-card stats-card">
+                    <div class="stats-header">
+                        <span class="stats-title">Total Farms</span>
+                        <span class="stats-icon blue-icon"><i class="fas fa-tractor"></i></span>
+                    </div>
+                    <div class="stats-value" id="total-farms">0</div>
+                </div>
+                <div class="dashboard-card stats-card">
+                    <div class="stats-header">
+                        <span class="stats-title">Total Motors</span>
+                        <span class="stats-icon green-icon"><i class="fas fa-cogs"></i></span>
+                    </div>
+                    <div class="stats-value" id="total-motors">0</div>
+                </div>
+                <div class="dashboard-card stats-card">
+                    <div class="stats-header">
+                        <span class="stats-title">Total Valves</span>
+                        <span class="stats-icon orange-icon"><i class="fas fa-tint"></i></span>
+                    </div>
+                    <div class="stats-value" id="total-valves">0</div>
+                </div>
+                <div class="dashboard-card stats-card">
+                    <div class="stats-header">
+                        <span class="stats-title">Total Users</span>
+                        <span class="stats-icon blue-icon"><i class="fas fa-users"></i></span>
+                    </div>
+                    <div class="stats-value" id="total-users">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Farm Section -->
+        <div id="create-farm-section" class="section">
+            <h2>Create/Edit Farm</h2>
+            <div class="form-container">
+                <input type="hidden" id="farm-edit-id">
+                <div class="form-grid">
+                    <input type="text" id="farm-name" placeholder="Farm Name">
+                    <input type="text" id="farm-location" placeholder="Location">
+                    <select id="farm-owner">
+                        <option value="">Select Owner</option>
+                    </select>
+                </div>
+                <div id="owner-error" class="text-danger"></div>
+                <div id="motors-container" class="mt-4">
+                    <h3>Motors</h3>
+                    <div id="motor-inputs"></div>
+                    <button type="button" onclick="addMotorInput()" class="btn-primary">Add Motor</button>
+                </div>
+                <button onclick="saveFarm()" class="btn-primary mt-4">Save Farm</button>
+            </div>
+        </div>
+
+        <!-- Farm List Section -->
+        <div id="farm-list-section" class="section">
+            <h2>Farm List</h2>
+            <div class="form-container">
+                <button onclick="listFarms()" class="btn-primary mb-4">Refresh Farm List</button>
+                <div id="farm-list"></div>
+            </div>
+        </div>
+
+        <!-- Farm Details Section -->
+        <div id="farm-details-section" class="section">
+            <h2>Farm Details</h2>
+            <div class="form-container">
+                <div class="flex gap-4 mb-4">
+                    <input type="number" id="farm-id" placeholder="Farm ID" class="flex-1">
+                    <button onclick="getFarmData()" class="btn-primary">Get Farm Data</button>
+                </div>
+                <div id="farm-data"></div>
+            </div>
+        </div>
+
+        <!-- User List Section -->
+        <div id="user-list-section" class="section">
+            <h2>User List</h2>
+            <div class="table-container">
+                <button id="addUserBtn" class="btn-primary mb-4">Add New User</button>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Role</th>
+                            <th>Active</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable"></tbody>
+                </table>
+                <div id="loadingIndicator" class="text-center hidden">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Create/Edit User Section -->
+        <div id="create-user-section" class="section">
+            <h2 id="userFormTitle">Create New User</h2>
+            <div class="form-container">
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <div class="form-grid">
+                        <div>
+                            <label for="username">Username</label>
+                            <input type="text" id="username" required>
+                        </div>
+                        <div>
+                            <label for="email">Email</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div>
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName">
+                        </div>
+                        <div>
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName">
+                        </div>
+                        <div>
+                            <label for="role">Role</label>
+                            <select id="role">
+                                <option value="admin">Admin</option>
+                                <option value="user">User</option>
+                                <option value="guest">Guest</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="isActive">Active</label>
+                            <input type="checkbox" id="isActive" checked>
+                        </div>
+                        <div>
+                            <label for="phoneNumber">Phone Number</label>
+                            <input type="tel" id="phoneNumber">
+                        </div>
+                        <div>
+                            <label for="address">Address</label>
+                            <input type="text" id="address">
+                        </div>
+                        <div>
+                            <label for="password">Password</label>
+                            <input type="password" id="password">
+                            <small id="passwordHint" class="hidden">Leave blank to keep current password</small>
+                        </div>
+                        <div>
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="password" id="confirmPassword">
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="button" onclick="showSection('user-list')" class="btn-danger">Cancel</button>
+                        <button type="button" id="saveUserBtn" class="btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
+        const USER_API_URL = 'http://127.0.0.1:8000/users/';
+
+        $(document).ready(function() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/adminpage';
+                return;
+            }
+
+            $.ajaxSetup({
+                headers: {
+                    'Authorization': 'Token ' + token
+                }
+            });
+
+            loadOwners();
+            addMotorInput();
+            loadDashboardData();
+            fetchUsers();
+        });
+
+        function toggleDrawer() {
+            const drawer = document.getElementById('drawer');
+            const content = document.getElementById('content');
+            drawer.classList.toggle('open');
+            content.classList.toggle('shifted');
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/adminpage';
+        }
+
+        function showSection(sectionId) {
+            $('.section').removeClass('active');
+            $('.nav-btn').removeClass('active');
+            $(`#${sectionId}-section`).addClass('active');
+            $(`#${sectionId}-btn`).addClass('active');
+            if (sectionId === 'farm-list') listFarms();
+            if (sectionId === 'dashboard') loadDashboardData();
+            if (sectionId === 'user-list') fetchUsers();
+        }
+
+        $('.nav-btn').click(function() {
+            const section = this.id.replace('-btn', '');
+            showSection(section);
+        });
+
+        function showNotification(message, type = 'success') {
+            const notification = $('#notification');
+            notification.text(message).removeClass('success error').addClass(type).show();
+            setTimeout(() => notification.hide(), 3000);
+        }
+
+        function getCsrfToken() {
+            const cookieValue = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
+            return cookieValue;
+        }
+
+        // Farm Management Functions
+        function loadOwners() {
+            $.ajax({
+                url: USER_API_URL,
+                method: 'GET',
+                success: function(users) {
+                    const ownerSelect = $('#farm-owner');
+                    if (!users || users.length === 0) {
+                        $('#owner-error').text('No users found');
+                        return;
+                    }
+                    users.forEach(user => {
+                        ownerSelect.append(
+                            `<option value="${user.id}">${user.email} (${user.role})</option>`
+                        );
+                    });
+                    $('#owner-error').text('');
+                },
+                error: function(xhr) {
+                    $('#owner-error').text(`Failed to load owners: ${xhr.status} - ${xhr.statusText}`);
+                }
+            });
+        }
+
+        let motorCount = 0;
+
+        function addMotorInput(motor = null) {
+            motorCount++;
+            const motorHtml = `
+                <div class="motor-input flex gap-4 mb-4" id="motor-${motorCount}">
+                    <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}" placeholder="UIN" class="flex-1" onblur="checkUIN(${motorCount}, '${motor?.id || ''}')">
+                    <input type="hidden" id="motor-id-${motorCount}" value="${motor?.id || ''}">
+                    <select id="motor-type-${motorCount}" class="flex-1">
+                        <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>
+                        <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>
+                        <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>
+                    </select>
+                    <input type="number" id="valve-count-${motorCount}" placeholder="Valve Count" min="1" value="${motor?.valve_count || ''}" class="flex-1">
+                    <button type="button" onclick="$('#motor-${motorCount}').remove()" class="btn-danger">Remove</button>
+                </div>
+            `;
+            $('#motor-inputs').append(motorHtml);
+        }
+
+        function checkUIN(count, currentMotorId) {
+            const uinInput = $(`#UIN-${count}`);
+            const uinValue = uinInput.val();
+            if (!uinValue) return;
+
+            $.ajax({
+                url: `${API_BASE_URL}motors/`,
+                method: 'GET',
+                success: function(motors) {
+                    const existingMotor = motors.find(motor => motor.UIN == uinValue && motor.id != currentMotorId);
+                    if (existingMotor) {
+                        showNotification(`The UIN ${uinValue} is already taken by Motor ID: ${existingMotor.id}`, 'error');
+                        uinInput.val('');
+                    }
+                },
+                error: function(xhr) {
+                    showNotification(`Error checking UIN: ${xhr.statusText}`, 'error');
+                }
+            });
+        }
+
+        function saveFarm() {
+            const farmId = $('#farm-edit-id').val();
+            const motors = [];
+
+            let hasError = false;
+            $('#motor-inputs .motor-input').each(function() {
+                const motorUIN = $(this).find('input[id^="UIN-"]').val();
+                const motorType = $(this).find('select[id^="motor-type-"]').val();
+                const valveCount = parseInt($(this).find('input[id^="valve-count-"]').val());
+                const motorId = $(this).find('input[id^="motor-id-"]').val();
+
+                if (isNaN(valveCount) || valveCount < 1) {
+                    showNotification('Please enter a valid valve count', 'error');
+                    hasError = true;
+                    return false;
+                }
+
+                // Create motor object based on whether it's an update or new creation
+                const motorObject = {
+                    motor_type: motorType,
+                    valve_count: valveCount
+                };
+
+                // Only include UIN for new motors (POST requests)
+                if (!farmId) {
+                    motorObject.UIN = motorUIN;
+                }
+
+                // Include ID for existing motors
+                if (motorId) {
+                    motorObject.id = motorId;
+                }
+
+                motors.push(motorObject);
+            });
+
+            if (hasError) return;
+            if (motors.length === 0) {
+                showNotification('Please add at least one motor', 'error');
+                return;
+            }
+
+            const farmData = {
+                name: $('#farm-name').val() || 'Unnamed Farm',
+                location: $('#farm-location').val() || 'Unknown Location',
+                owner: parseInt($('#farm-owner').val()),
+                motors: motors
+            };
+
+            const method = farmId ? 'PUT' : 'POST';
+            const url = farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`;
+
+            $.ajax({
+                url: url,
+                method: method,
+                contentType: 'application/json',
+                data: JSON.stringify(farmData),
+                success: function(response) {
+                    showNotification(`Farm ${farmId ? 'updated' : 'created'} with ID: ${response.id}`);
+                    resetFarmForm();
+                    showSection('farm-list');
+                    listFarms();
+                },
+                error: function(xhr) {
+                    showNotification('Error saving farm: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function resetFarmForm() {
+            $('#farm-edit-id').val('');
+            $('#farm-name, #farm-location').val('');
+            $('#farm-owner').val('');
+            $('#motor-inputs').empty();
+            motorCount = 0;
+            addMotorInput();
+        }
+
+        function listFarms() {
+            $.ajax({
+                url: `${API_BASE_URL}farms/`,
+                method: 'GET',
+                success: function(farms) {
+                    let html = '';
+                    farms.forEach(farm => {
+                        html += `
+                            <div class="mb-4 p-4 bg-white rounded-lg shadow">
+                                <h3>${farm.name} (ID: ${farm.id}) - ${farm.location}</h3>
+                                <p>Owner ID: ${farm.owner}</p>
+                                <p>Motors: ${farm.motors.length}</p>
+                                <div class="flex gap-2 mt-2">
+                                    <button onclick="editFarm(${farm.id})" class="btn-primary">Edit</button>
+                                    <button onclick="deleteFarm(${farm.id})" class="btn-danger">Delete</button>
+                                    <button onclick="viewFarmDetails(${farm.id})" class="btn-primary">View Details</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    $('#farm-list').html(html);
+                },
+                error: function(xhr) {
+                    $('#farm-list').html(`<p class="text-danger">Error: ${xhr.responseText}</p>`);
+                }
+            });
+        }
+
+        function editFarm(farmId) {
+            $.ajax({
+                url: `${API_BASE_URL}farms/${farmId}/`,
+                method: 'GET',
+                success: function(farm) {
+                    $('#farm-edit-id').val(farm.id);
+                    $('#farm-name').val(farm.name);
+                    $('#farm-location').val(farm.location);
+                    $('#farm-owner').val(farm.owner);
+                    $('#motor-inputs').empty();
+                    motorCount = 0;
+                    farm.motors.forEach(motor => addMotorInput(motor));
+                    showSection('create-farm');
+                },
+                error: function(xhr) {
+                    showNotification('Error loading farm: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function deleteFarm(farmId) {
+            if (confirm('Are you sure you want to delete this farm?')) {
+                $.ajax({
+                    url: `${API_BASE_URL}farms/${farmId}/`,
+                    method: 'DELETE',
+                    success: function() {
+                        showNotification('Farm deleted');
+                        listFarms();
+                    },
+                    error: function(xhr) {
+                        showNotification('Error deleting farm: ' + xhr.responseText, 'error');
+                    }
+                });
+            }
+        }
+
+        function getFarmData() {
+            const farmId = $('#farm-id').val();
+            if (!farmId) {
+                $('#farm-data').html('<p>Please enter a Farm ID</p>');
+                return;
+            }
+            $.ajax({
+                url: `${API_BASE_URL}farms/${farmId}/`,
+                method: 'GET',
+                success: function(data) {
+                    displayFarmData(data);
+                },
+                error: function(xhr) {
+                    $('#farm-data').html(`<p class="text-danger">Error: ${xhr.responseText}</p>`);
+                }
+            });
+        }
+
+        function displayFarmData(data) {
+            let html = `
+                <h3>${data.name} - ${data.location}</h3>
+                <p>Owner ID: ${data.owner || 'Not assigned'}</p>
+                <h4 class="mt-4">Motors and Valves:</h4>
+            `;
+            if (data.motors && data.motors.length > 0) {
+                data.motors.forEach(motor => {
+                    html += `
+                        <div class="p-4 bg-white rounded-lg shadow mt-2">
+                            <h4>Motor ${motor.id} (${motor.motor_type}) - ${motor.valve_count} valves - Status: ${motor.is_active ? 'On' : 'Off'}</h4>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="editMotor(${motor.id}, ${data.id})" class="btn-primary">Edit</button>
+                                <button onclick="deleteMotor(${motor.id}, ${data.id})" class="btn-danger">Delete</button>
+                                <button onclick="toggleMotor(${motor.id}, ${motor.is_active})" class="${motor.is_active ? 'btn-danger' : 'btn-primary'}">${motor.is_active ? 'Turn Off' : 'Turn On'}</button>
+                            </div>
+                    `;
+                    if (motor.valves && motor.valves.length > 0) {
+                        motor.valves.forEach(valve => {
+                            html += `
+                                <div class="flex items-center gap-2 mt-1">
+                                    ${valve.name} (ID: ${valve.id}) - Status: ${valve.is_active ? 'Active' : 'Inactive'}
+                                    <button onclick="toggleValve(${valve.id}, ${valve.is_active})" class="btn-primary">Toggle</button>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        html += `<p>No valves assigned yet</p>`;
+                    }
+                    html += `</div>`;
+                });
+            } else {
+                html += `<p>No motors assigned to this farm</p>`;
+            }
+            $('#farm-data').html(html);
+        }
+
+        function editMotor(motorId, farmId) {
+            $.ajax({
+                url: `${API_BASE_URL}motors/${motorId}/`,
+                method: 'GET',
+                success: function(motor) {
+                    editFarm(farmId);
+                    setTimeout(() => {
+                        for (let i = 1; i <= motorCount; i++) {
+                            if ($(`#motor-id-${i}`).val() == motorId) {
+                                $(`#UIN-${i}`).val(motor.UIN);
+                                $(`#motor-type-${i}`).val(motor.motor_type);
+                                $(`#valve-count-${i}`).val(motor.valve_count);
+                                break;
+                            }
+                        }
+                    }, 100);
+                },
+                error: function(xhr) {
+                    showNotification('Error loading motor: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function deleteMotor(motorId, farmId) {
+            if (confirm('Are you sure you want to delete this motor?')) {
+                $.ajax({
+                    url: `${API_BASE_URL}motors/${motorId}/`,
+                    method: 'DELETE',
+                    success: function() {
+                        showNotification('Motor deleted');
+                        listFarms();
+                        if ($('#farm-edit-id').val() == farmId) editFarm(farmId);
+                    },
+                    error: function(xhr) {
+                        showNotification('Error deleting motor: ' + xhr.responseText, 'error');
+                    }
+                });
+            }
+        }
+
+        function toggleValve(valveId, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            const valveElement = $(`#farm-data .valve:contains('(ID: ${valveId})')`);
+            const valveText = valveElement.text();
+            const valveNameMatch = valveText.match(/^(.*)\s\(ID:/);
+            const valveName = valveNameMatch ? valveNameMatch[1].trim() : `Valve ${valveId}`;
+
+            $.ajax({
+                url: `${API_BASE_URL}valves/${valveId}/`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({ name: valveName, is_active: newStatus }),
+                success: function() {
+                    getFarmData();
+                    listFarms();
+                },
+                error: function(xhr) {
+                    showNotification('Error toggling valve: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function toggleMotor(motorId, currentStatus) {
+            const newStatus = currentStatus === 1 ? 0 : 1;
+            $.ajax({
+                url: `${API_BASE_URL}motors/${motorId}/`,
+                method: 'PATCH',
+                contentType: 'application/json',
+                data: JSON.stringify({ is_active: newStatus }),
+                success: function() {
+                    getFarmData();
+                    listFarms();
+                },
+                error: function(xhr) {
+                    showNotification('Error toggling motor: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function viewFarmDetails(farmId) {
+            $('#farm-id').val(farmId);
+            getFarmData();
+            showSection('farm-details');
+        }
+
+        function loadDashboardData() {
+            $.ajax({
+                url: `${API_BASE_URL}farms/`,
+                method: 'GET',
+                success: function(farms) {
+                    $('#total-farms').text(farms.length);
+                    const totalMotors = farms.reduce((sum, farm) => sum + farm.motors.length, 0);
+                    $('#total-motors').text(totalMotors);
+                    const totalValves = farms.reduce((sum, farm) => sum + farm.motors.reduce((vSum, motor) => vSum + (motor.valves ? motor.valves.length : 0), 0), 0);
+                    $('#total-valves').text(totalValves);
+                },
+                error: function(xhr) {
+                    showNotification('Error loading farm data: ' + xhr.responseText, 'error');
+                }
+            });
+
+            $.ajax({
+                url: USER_API_URL,
+                method: 'GET',
+                success: function(users) {
+                    $('#total-users').text(users.length);
+                },
+                error: function(xhr) {
+                    showNotification('Error loading user data: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        // User Management Functions
+        let currentUserId = null;
+
+        function fetchUsers() {
+            $('#loadingIndicator').removeClass('hidden');
+            $.ajax({
+                url: USER_API_URL,
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    renderUserTable(data);
+                    $('#loadingIndicator').addClass('hidden');
+                },
+                error: function(xhr) {
+                    $('#loadingIndicator').addClass('hidden');
+                    showNotification('Failed to load users: ' + xhr.statusText, 'error');
+                }
+            });
+        }
+
+        function renderUserTable(users) {
+            const userTable = $('#userTable');
+            userTable.empty();
+
+            users.forEach(user => {
+                userTable.append(`
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.first_name || ''}</td>
+                        <td>${user.last_name || ''}</td>
+                        <td>${user.role || 'N/A'}</td>
+                        <td>${user.is_active ? 'Active' : 'Inactive'}</td>
+                        <td>
+                            <button onclick="fetchUserDetails(${user.id})" class="btn-primary">Edit</button>
+                            <button onclick="showDeleteConfirmation(${user.id})" class="btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        }
+
+        function fetchUserDetails(userId) {
+            $.ajax({
+                url: `${USER_API_URL}${userId}/`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(user) {
+                    populateUserForm(user);
+                    currentUserId = user.id;
+                    $('#userFormTitle').text('Edit User');
+                    $('#passwordHint').removeClass('hidden');
+                    showSection('create-user');
+                },
+                error: function(xhr) {
+                    showNotification('Failed to load user details: ' + xhr.statusText, 'error');
+                }
+            });
+        }
+
+        function populateUserForm(user) {
+            $('#userId').val(user.id);
+            $('#username').val(user.username);
+            $('#email').val(user.email);
+            $('#firstName').val(user.first_name || '');
+            $('#lastName').val(user.last_name || '');
+            $('#role').val(user.role || 'user');
+            $('#isActive').prop('checked', user.is_active);
+            $('#phoneNumber').val(user.phone_number || '');
+            $('#address').val(user.address || '');
+            $('#password').val('');
+            $('#confirmPassword').val('');
+        }
+
+        function showDeleteConfirmation(userId) {
+            currentUserId = userId;
+            if (confirm('Are you sure you want to delete this user?')) {
+                deleteUser(userId);
+            }
+        }
+
+        function createUser(userData) {
+            $.ajax({
+                url: USER_API_URL,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(userData),
+                headers: { 'X-CSRFToken': getCsrfToken() },
+                success: function() {
+                    showNotification('User created successfully');
+                    resetUserForm();
+                    showSection('user-list');
+                    fetchUsers();
+                },
+                error: function(xhr) {
+                    showNotification('Failed to create user: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function updateUser(userId, userData) {
+            $.ajax({
+                url: `${USER_API_URL}${userId}/`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(userData),
+                headers: { 'X-CSRFToken': getCsrfToken() },
+                success: function() {
+                    showNotification('User updated successfully');
+                    resetUserForm();
+                    showSection('user-list');
+                    fetchUsers();
+                },
+                error: function(xhr) {
+                    showNotification('Failed to update user: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        function deleteUser(userId) {
+            $.ajax({
+                url: `${USER_API_URL}${userId}/`,
+                type: 'DELETE',
+                headers: { 'X-CSRFToken': getCsrfToken() },
+                success: function() {
+                    showNotification('User deleted successfully');
+                    fetchUsers();
+                },
+                error: function(xhr) {
+                    showNotification('Failed to delete user: ' + xhr.statusText, 'error');
+                }
+            });
+        }
+
+        function gatherUserFormData() {
+            const userData = {
+                username: $('#username').val(),
+                email: $('#email').val(),
+                first_name: $('#firstName').val(),
+                last_name: $('#lastName').val(),
+                role: $('#role').val(),
+                is_active: $('#isActive').is(':checked'),
+                phone_number: $('#phoneNumber').val(),
+                address: $('#address').val()
+            };
+
+            const password = $('#password').val();
+            const confirmPassword = $('#confirmPassword').val();
+
+            if (password) {
+                if (password !== confirmPassword) {
+                    showNotification('Passwords do not match', 'error');
+                    return null;
+                }
+                userData.password = password;
+            }
+
+            return userData;
+        }
+
+        function resetUserForm() {
+            $('#userForm')[0].reset();
+            $('#userId').val('');
+            currentUserId = null;
+            $('#userFormTitle').text('Create New User');
+            $('#passwordHint').addClass('hidden');
+        }
+
+        $('#addUserBtn').click(function() {
+            resetUserForm();
+            showSection('create-user');
+        });
+
+        $('#saveUserBtn').click(function() {
+            const userData = gatherUserFormData();
+            if (!userData) return;
+
+            if (currentUserId) {
+                updateUser(currentUserId, userData);
+            } else {
+                createUser(userData);
+            }
+        });
+    </script>
+</body>
+</html>
