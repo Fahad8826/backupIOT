@@ -14,9 +14,7 @@ from rest_framework.authtoken.models import Token  # Ensure this import is corre
 from AdminIOT import settings
 from accounts.serializers import UserSerializer
 
-User = get_user_model()  # This will get your custom User or the default User
-
-# Constants for admin credentials
+User = get_user_model()
 
 
 

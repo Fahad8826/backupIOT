@@ -48,7 +48,7 @@
             <h1>Management Dashboard</h1>
         </div>
         <div class="header-right">
-            <button class="header-btn btn btn-primary" trembling onclick="logout()">
+            <button class="header-btn btn btn-primary" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
         </div>
@@ -57,6 +57,7 @@
     <div id="content" class="content">
         <!-- Dashboard Section -->
         <div id="dashboard-section" class="section active">
+            <h2 class="mb-6">Dashboard Overview</h2>
             <div class="dashboard-grid">
                 <div class="dashboard-card stats-card">
                     <div class="stats-header">
@@ -85,6 +86,13 @@
                         <span class="stats-icon blue-icon"><i class="fas fa-users"></i></span>
                     </div>
                     <div class="stats-value" id="total-users">0</div>
+                </div>
+            </div>
+            <!-- Recent Farms Section -->
+            <div id="recent-farms" class="mt-8">
+                <h3 class="text-lg font-semibold mb-4">Recent Farms</h3>
+                <div id="recent-farms-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Recent farms will be populated here by JavaScript -->
                 </div>
             </div>
         </div>

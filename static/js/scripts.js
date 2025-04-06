@@ -1,771 +1,4 @@
-//const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
-//const USER_API_URL = 'http://127.0.0.1:8000/users/';
-//const ITEMS_PER_PAGE = 10;
-//
-//$(document).ready(function() {
-//    const token = localStorage.getItem('adminToken');
-//    if (!token) {
-//        window.location.href = '/adminpage';
-//        return;
-//    }
-//
-//    $.ajaxSetup({
-//        headers: {
-//            'Authorization': 'Token ' + token
-//        }
-//    });
-//
-//    loadOwners();
-//    addMotorInput();
-//    loadDashboardData();
-//    fetchUsers(1);
-//
-//    // Farm List events
-//    $('#refreshFarmBtn').click(() => fetchFarms(1));
-//    $('#farmSearch').on('input', debounce(() => fetchFarms(1), 300));
-//    $('#farmPrevBtn').click(() => fetchFarms(currentFarmPage - 1));
-//    $('#farmNextBtn').click(() => fetchFarms(currentFarmPage + 1));
-//
-//    // User List events
-//    $('#addUserBtn').click(() => {
-//        resetUserForm();
-//        showSection('create-user');
-//    });
-//    $('#userSearch').on('input', debounce(() => fetchUsers(1), 300));
-//    $('#userPrevBtn').click(() => fetchUsers(currentUserPage - 1));
-//    $('#userNextBtn').click(() => fetchUsers(currentUserPage + 1));
-//});
-//
-//// Debounce function to prevent excessive API calls during search
-//// Improved debounce function
-//function debounce(func, wait) {
-//    let timeout;
-//    return function(...args) {
-//        clearTimeout(timeout);
-//        timeout = setTimeout(() => func.apply(this, args), wait);
-//    };
-//}
-//
-//// Initialize search handlers with improved debounce
-//function initializeSearchHandlers() {
-//    // Farm search
-//    const debouncedFarmSearch = debounce(() => {
-//        // Reset to page 1 when search changes
-//        currentFarmPage = 1;
-//        fetchFarms(1);
-//    }, 300);
-//
-//    $('#farmSearch').off('input').on('input', debouncedFarmSearch);
-//
-//    // User search
-//    const debouncedUserSearch = debounce(() => {
-//        // Reset to page 1 when search changes
-//        currentUserPage = 1;
-//        fetchUsers(1);
-//    }, 300);
-//
-//    $('#userSearch').off('input').on('input', debouncedUserSearch);
-//}
-//
-//// Call this in document ready
-//$(document).ready(function() {
-//    // ... existing code ...
-//    initializeSearchHandlers();
-//    // ... existing code ...
-//});
-//
-//function toggleDrawer() {
-//    const drawer = document.getElementById('drawer');
-//    const content = document.getElementById('content');
-//    const isOpen = drawer.classList.contains('open');
-//
-//    drawer.classList.toggle('open');
-//    content.classList.toggle('shifted');
-//
-//    if (!isOpen) {
-//        $('.section').removeClass('active');
-//        $('#dashboard-section').addClass('active');
-//    }
-//}
-//
-//function logout() {
-//    localStorage.removeItem('adminToken');
-//    window.location.href = '/adminpage';
-//}
-//
-//function showSection(sectionId) {
-//    $('.section').removeClass('active');
-//    $('.nav-btn').removeClass('active');
-//    $(`#${sectionId}-section`).addClass('active');
-//    $(`#${sectionId}-btn`).addClass('active');
-//
-//    switch(sectionId) {
-//        case 'farm-list':
-//            fetchFarms(1);
-//            break;
-//        case 'dashboard':
-//            loadDashboardData();
-//            break;
-//        case 'user-list':
-//            fetchUsers(1);
-//            break;
-//    }
-//}
-//
-//$('.nav-btn').click(function() {
-//    const section = this.id.replace('-btn', '');
-//    showSection(section);
-//});
-//
-//function showNotification(message, type = 'success') {
-//    const notification = $('#notification');
-//    notification.text(message).removeClass('success error').addClass(type).show();
-//    setTimeout(() => notification.hide(), 3000);
-//}
-//
-//function getCsrfToken() {
-//    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];
-//    return cookieValue;
-//}
-//
-//// Farm Management Functions
-//function loadOwners() {
-//    $.ajax({
-//        url: USER_API_URL,
-//        method: 'GET',
-//        success: function(users) {
-//            const ownerSelect = $('#farm-owner');
-//            ownerSelect.empty().append('<option value="">Select Owner</option>');
-//            if (!users || users.length === 0) {
-//                $('#owner-error').text('No users found');
-//                return;
-//            }
-//            users.forEach(user => {
-//                ownerSelect.append(`<option value="${user.id}">${user.email} (${user.role})</option>`);
-//            });
-//            $('#owner-error').text('');
-//        },
-//        error: function(xhr) {
-//            $('#owner-error').text(`Failed to load owners: ${xhr.statusText}`);
-//            console.error('Error loading owners:', xhr);
-//        }
-//    });
-//}
-//
-//let motorCount = 0;
-//
-//function addMotorInput(motor = null) {
-//    motorCount++;
-//    const motorHtml = `
-//        <div class="motor-input flex gap-4 mb-4" id="motor-${motorCount}">
-//            <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}"
-//                   placeholder="UIN" class="flex-1" onblur="checkUIN(${motorCount}, '${motor?.id || ''}')">
-//            <input type="hidden" id="motor-id-${motorCount}" value="${motor?.id || ''}">
-//            <select id="motor-type-${motorCount}" class="flex-1">
-//                <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>
-//                <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>
-//                <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>
-//            </select>
-//            <input type="number" id="valve-count-${motorCount}"
-//                   placeholder="Valve Count" min="1" value="${motor?.valve_count || ''}" class="flex-1">
-//            <button type="button" onclick="$(this).closest('.motor-input').remove()"
-//                    class="btn-danger">Remove</button>
-//        </div>
-//    `;
-//    $('#motor-inputs').append(motorHtml);
-//}
-//
-//function checkUIN(count, currentMotorId) {
-//    const uinInput = $(`#UIN-${count}`);
-//    const uinValue = uinInput.val();
-//    if (!uinValue) return;
-//
-//    $.ajax({
-//        url: `${API_BASE_URL}motors/`,
-//        method: 'GET',
-//        success: function(motors) {
-//            const existingMotor = motors.find(motor => motor.UIN == uinValue && motor.id != currentMotorId);
-//            if (existingMotor) {
-//                showNotification(`UIN ${uinValue} is already taken by Motor ID: ${existingMotor.id}`, 'error');
-//                uinInput.val('');
-//            }
-//        },
-//        error: function(xhr) {
-//            showNotification(`Error checking UIN: ${xhr.statusText}`, 'error');
-//            console.error('Error checking UIN:', xhr);
-//        }
-//    });
-//}
-//
-//function saveFarm() {
-//    const farmId = $('#farm-edit-id').val();
-//    const motors = [];
-//    let hasError = false;
-//
-//    $('.motor-input').each(function() {
-//        const motorId = $(this).find('[id^="motor-id-"]').val();
-//        const motorUIN = $(this).find('[id^="UIN-"]').val();
-//        const motorType = $(this).find('[id^="motor-type-"]').val();
-//        const valveCount = parseInt($(this).find('[id^="valve-count-"]').val()) || 0;
-//
-//        if (valveCount < 1) {
-//            showNotification('Valve count must be at least 1', 'error');
-//            hasError = true;
-//            return false;
-//        }
-//
-//        const motorObject = {
-//            motor_type: motorType,
-//            valve_count: valveCount,
-//            UIN: motorUIN || null
-//        };
-//        if (motorId) motorObject.id = motorId;
-//        motors.push(motorObject);
-//    });
-//
-//    if (hasError || motors.length === 0) {
-//        if (!hasError) showNotification('Please add at least one motor', 'error');
-//        return;
-//    }
-//
-//    const farmData = {
-//        name: $('#farm-name').val().trim() || 'Unnamed Farm',
-//        location: $('#farm-location').val().trim() || 'Unknown Location',
-//        owner: parseInt($('#farm-owner').val()) || null,
-//        motors: motors
-//    };
-//
-//    $.ajax({
-//        url: farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`,
-//        method: farmId ? 'PUT' : 'POST',
-//        contentType: 'application/json',
-//        data: JSON.stringify(farmData),
-//        success: function(response) {
-//            showNotification(`Farm ${farmId ? 'updated' : 'created'} successfully`);
-//            resetFarmForm();
-//            showSection('farm-list');
-//        },
-//        error: function(xhr) {
-//            const error = xhr.responseJSON || {};
-//            let message = 'Error saving farm: ';
-//            if (error.motors) {
-//                message += error.motors.map((m, i) => `Motor ${i+1}: ${m.UIN?.[0] || 'Invalid data'}`).join('; ');
-//            } else {
-//                message += xhr.statusText;
-//            }
-//            showNotification(message, 'error');
-//            console.error('Error saving farm:', xhr);
-//        }
-//    });
-//}
-//
-//function resetFarmForm() {
-//    $('#farm-edit-id').val('');
-//    $('#farm-name, #farm-location').val('');
-//    $('#farm-owner').val('');
-//    $('#motor-inputs').empty();
-//    motorCount = 0;
-//    addMotorInput();
-//}
-//
-//let currentFarmPage = 1;
-//let totalFarmPages = 1;
-//
-//function fetchFarms(page) {
-//    currentFarmPage = page < 1 ? 1 : page;
-//    const searchQuery = $('#farmSearch').val().trim();
-//    $("#farm-loading").show();
-//    $("#farmTable").empty();
-//
-//    $.ajax({
-//        url: `${API_BASE_URL}farms/`,
-//        method: 'GET',
-//        data: {
-//            page: currentFarmPage,
-//            search: searchQuery,
-//            limit: ITEMS_PER_PAGE
-//        },
-//        success: function(response) {
-//            $("#farm-loading").hide();
-//            let farms = [];
-//
-//            // Check if response is paginated (has results property)
-//            if (response.results) {
-//                farms = response.results;
-//                totalFarmPages = Math.ceil(response.count / ITEMS_PER_PAGE);
-//            } else if (Array.isArray(response)) {
-//                // Handle non-paginated array response
-//                const totalItems = response.length;
-//                totalFarmPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-//
-//                // Apply manual pagination
-//                const startIndex = (currentFarmPage - 1) * ITEMS_PER_PAGE;
-//                const endIndex = startIndex + ITEMS_PER_PAGE;
-//                farms = response.slice(startIndex, endIndex);
-//            } else {
-//                console.error("Unexpected response format:", response);
-//                showNotification("Received unexpected data format from server", "error");
-//                farms = [];
-//                totalFarmPages = 1;
-//            }
-//
-//            if (farms.length === 0) {
-//                $("#farmTable").html("<tr><td colspan='6' class='text-center'>No farms found</td></tr>");
-//            } else {
-//                farms.forEach(farm => {
-//                    $("#farmTable").append(`
-//                        <tr>
-//                            <td>${farm.id || 'N/A'}</td>
-//                            <td>${farm.name || 'Unnamed'}</td>
-//                            <td>${farm.location || 'Unknown'}</td>
-//                            <td>${farm.owner || 'Not assigned'}</td>
-//                            <td>${farm.motors ? farm.motors.length : 0}</td>
-//                            <td>
-//                                <button onclick="editFarm(${farm.id})" class="btn-primary">Edit</button>
-//                                <button onclick="deleteFarm(${farm.id})" class="btn-danger">Delete</button>
-//                                <button onclick="viewFarmDetails(${farm.id})" class="btn-primary">View</button>
-//                            </td>
-//                        </tr>
-//                    `);
-//                });
-//            }
-//
-//            // Update pagination controls
-//            updateFarmPagination();
-//        },
-//        error: function(xhr, status, error) {
-//            $("#farm-loading").hide();
-//            $("#farmTable").html(`<tr><td colspan='6' class='text-danger text-center'>Error: ${xhr.statusText}</td></tr>`);
-//            console.error('Fetch farms error:', xhr, status, error);
-//        }
-//    });
-//}
-//
-//function updateFarmPagination() {
-//    $('#farmPageInfo').text(`Page ${currentFarmPage} of ${totalFarmPages}`);
-//    $('#farmPrevBtn').prop('disabled', currentFarmPage <= 1);
-//    $('#farmNextBtn').prop('disabled', currentFarmPage >= totalFarmPages);
-//}
-//
-//function editFarm(farmId) {
-//    $.ajax({
-//        url: `${API_BASE_URL}farms/${farmId}/`,
-//        method: 'GET',
-//        success: function(farm) {
-//            $('#farm-edit-id').val(farm.id);
-//            $('#farm-name').val(farm.name);
-//            $('#farm-location').val(farm.location);
-//            $('#farm-owner').val(farm.owner);
-//            $('#motor-inputs').empty();
-//            motorCount = 0;
-//            farm.motors.forEach(motor => addMotorInput(motor));
-//            showSection('create-farm');
-//        },
-//        error: function(xhr) {
-//            showNotification('Error loading farm: ' + xhr.statusText, 'error');
-//            console.error('Error loading farm:', xhr);
-//        }
-//    });
-//}
-//
-//function deleteFarm(farmId) {
-//    if (confirm('Are you sure you want to delete this farm?')) {
-//        $.ajax({
-//            url: `${API_BASE_URL}farms/${farmId}/`,
-//            method: 'DELETE',
-//            success: function() {
-//                showNotification('Farm deleted');
-//                fetchFarms(currentFarmPage);
-//            },
-//            error: function(xhr) {
-//                showNotification('Error deleting farm: ' + xhr.statusText, 'error');
-//                console.error('Error deleting farm:', xhr);
-//            }
-//        });
-//    }
-//}
-//
-//function getFarmData() {
-//    const farmId = $('#farm-id').val();
-//    if (!farmId) {
-//        $('#farm-data').html('<p class="text-danger">Please enter a Farm ID</p>');
-//        return;
-//    }
-//    $.ajax({
-//        url: `${API_BASE_URL}farms/${farmId}/`,
-//        method: 'GET',
-//        success: function(data) {
-//            displayFarmData(data);
-//        },
-//        error: function(xhr) {
-//            $('#farm-data').html(`<p class="text-danger">Error: ${xhr.statusText}</p>`);
-//            console.error('Error fetching farm data:', xhr);
-//        }
-//    });
-//}
-//
-//function displayFarmData(data) {
-//    let html = `
-//        <h3>${data.name} - ${data.location}</h3>
-//        <p>Owner ID: ${data.owner || 'Not assigned'}</p>
-//        <h4 class="mt-4">Motors and Valves:</h4>
-//    `;
-//    if (data.motors && data.motors.length > 0) {
-//        data.motors.forEach(motor => {
-//            html += `
-//                <div class="p-4 bg-white rounded-lg shadow mt-2">
-//                    <h4>Motor ${motor.id} (${motor.motor_type}) - ${motor.valve_count} valves - Status: ${motor.is_active ? 'On' : 'Off'}</h4>
-//                    <div class="flex gap-2 mt-2">
-//                        <button onclick="editMotor(${motor.id}, ${data.id})" class="btn-primary">Edit</button>
-//                        <button onclick="deleteMotor(${motor.id}, ${data.id})" class="btn-danger">Delete</button>
-//                        <button onclick="toggleMotor(${motor.id}, ${motor.is_active})" class="${motor.is_active ? 'btn-danger' : 'btn-primary'}">${motor.is_active ? 'Turn Off' : 'Turn On'}</button>
-//                    </div>
-//            `;
-//            if (motor.valves && motor.valves.length > 0) {
-//                motor.valves.forEach(valve => {
-//                    html += `
-//                        <div class="flex items-center gap-2 mt-1">
-//                            ${valve.name} (ID: ${valve.id}) - Status: ${valve.is_active ? 'Active' : 'Inactive'}
-//                            <button onclick="toggleValve(${valve.id}, ${valve.is_active})" class="btn-primary">Toggle</button>
-//                        </div>
-//                    `;
-//                });
-//            } else {
-//                html += `<p>No valves assigned yet</p>`;
-//            }
-//            html += `</div>`;
-//        });
-//    } else {
-//        html += `<p>No motors assigned to this farm</p>`;
-//    }
-//    $('#farm-data').html(html);
-//}
-//
-//function editMotor(motorId, farmId) {
-//    $.ajax({
-//        url: `${API_BASE_URL}motors/${motorId}/`,
-//        method: 'GET',
-//        success: function(motor) {
-//            editFarm(farmId);
-//            setTimeout(() => {
-//                for (let i = 1; i <= motorCount; i++) {
-//                    if ($(`#motor-id-${i}`).val() == motorId) {
-//                        $(`#UIN-${i}`).val(motor.UIN);
-//                        $(`#motor-type-${i}`).val(motor.motor_type);
-//                        $(`#valve-count-${i}`).val(motor.valve_count);
-//                        break;
-//                    }
-//                }
-//            }, 100);
-//        },
-//        error: function(xhr) {
-//            showNotification('Error loading motor: ' + xhr.statusText, 'error');
-//            console.error('Error loading motor:', xhr);
-//        }
-//    });
-//}
-//
-//function deleteMotor(motorId, farmId) {
-//    if (confirm('Are you sure you want to delete this motor?')) {
-//        $.ajax({
-//            url: `${API_BASE_URL}motors/${motorId}/`,
-//            method: 'DELETE',
-//            success: function() {
-//                showNotification('Motor deleted');
-//                fetchFarms(currentFarmPage);
-//                if ($('#farm-edit-id').val() == farmId) editFarm(farmId);
-//            },
-//            error: function(xhr) {
-//                showNotification('Error deleting motor: ' + xhr.statusText, 'error');
-//                console.error('Error deleting motor:', xhr);
-//            }
-//        });
-//    }
-//}
-//
-//function toggleValve(valveId, currentStatus) {
-//    const newStatus = currentStatus ? 0 : 1;
-//    const valveElement = $(`#farm-data .valve:contains('(ID: ${valveId})')`);
-//    const valveText = valveElement.text();
-//    const valveNameMatch = valveText.match(/^(.*)\s\(ID:/);
-//    const valveName = valveNameMatch ? valveNameMatch[1].trim() : `Valve ${valveId}`;
-//
-//    $.ajax({
-//        url: `${API_BASE_URL}valves/${valveId}/`,
-//        method: 'PUT',
-//        contentType: 'application/json',
-//        data: JSON.stringify({ name: valveName, is_active: newStatus }),
-//        success: function() {
-//            getFarmData();
-//            fetchFarms(currentFarmPage);
-//        },
-//        error: function(xhr) {
-//            showNotification('Error toggling valve: ' + xhr.statusText, 'error');
-//            console.error('Error toggling valve:', xhr);
-//        }
-//    });
-//}
-//
-//function toggleMotor(motorId, currentStatus) {
-//    const newStatus = currentStatus ? 0 : 1;
-//    $.ajax({
-//        url: `${API_BASE_URL}motors/${motorId}/`,
-//        method: 'PATCH',
-//        contentType: 'application/json',
-//        data: JSON.stringify({ is_active: newStatus }),
-//        success: function() {
-//            getFarmData();
-//            fetchFarms(currentFarmPage);
-//        },
-//        error: function(xhr) {
-//            showNotification('Error toggling motor: ' + xhr.statusText, 'error');
-//            console.error('Error toggling motor:', xhr);
-//        }
-//    });
-//}
-//
-//function viewFarmDetails(farmId) {
-//    $('#farm-id').val(farmId);
-//    getFarmData();
-//    showSection('farm-details');
-//}
-//
-//function loadDashboardData() {
-//    $.ajax({
-//        url: `${API_BASE_URL}farms/`,
-//        method: 'GET',
-//        success: function(farms) {
-//            $('#total-farms').text(farms.length);
-//            const totalMotors = farms.reduce((sum, farm) => sum + (farm.motors ? farm.motors.length : 0), 0);
-//            $('#total-motors').text(totalMotors);
-//            const totalValves = farms.reduce((sum, farm) => sum + farm.motors.reduce((vSum, motor) => vSum + (motor.valves ? motor.valves.length : 0), 0), 0);
-//            $('#total-valves').text(totalValves);
-//        },
-//        error: function(xhr) {
-//            showNotification('Error loading farm data: ' + xhr.statusText, 'error');
-//            console.error('Error loading dashboard data:', xhr);
-//        }
-//    });
-//
-//    $.ajax({
-//        url: USER_API_URL,
-//        method: 'GET',
-//        success: function(users) {
-//            $('#total-users').text(users.length);
-//        },
-//        error: function(xhr) {
-//            showNotification('Error loading user data: ' + xhr.statusText, 'error');
-//            console.error('Error loading user data:', xhr);
-//        }
-//    });
-//}
-//
-//// User Management Functions
-//let currentUserPage = 1;
-//let totalUserPages = 1;
-//
-//function fetchUsers(page) {
-//    currentUserPage = page < 1 ? 1 : page;
-//    const searchQuery = $('#userSearch').val().trim();
-//    $('#user-loading').show();
-//    $('#userTable').empty();
-//
-//    $.ajax({
-//        url: USER_API_URL,
-//        type: 'GET',
-//        data: {
-//            page: currentUserPage,
-//            search: searchQuery,
-//            limit: ITEMS_PER_PAGE
-//        },
-//        success: function(response) {
-//            $('#user-loading').hide();
-//            console.log('API Response (Users):', response); // Debug the response
-//            let users = [];
-//            if (response.results) {
-//                users = response.results;
-//                totalUserPages = Math.ceil(response.count / ITEMS_PER_PAGE);
-//            } else {
-//                users = Array.isArray(response) ? response : [];
-//                totalUserPages = Math.ceil(users.length / ITEMS_PER_PAGE);
-//                users = users.slice((currentUserPage - 1) * ITEMS_PER_PAGE, currentUserPage * ITEMS_PER_PAGE);
-//            }
-//
-//            if (!users || users.length === 0) {
-//                $('#userTable').html("<tr><td colspan='8' class='text-center'>No users found</td></tr>");
-//            } else {
-//                users.forEach(user => {
-//                    $('#userTable').append(`
-//                        <tr>
-//                            <td>${user.id}</td>
-//                            <td>${user.username}</td>
-//                            <td>${user.email}</td>
-//                            <td>${user.first_name || ''}</td>
-//                            <td>${user.last_name || ''}</td>
-//                            <td>${user.role || 'N/A'}</td>
-//                            <td>${user.is_active ? 'Active' : 'Inactive'}</td>
-//                            <td>
-//                                <button onclick="fetchUserDetails(${user.id})" class="btn-primary">Edit</button>
-//                                <button onclick="showDeleteConfirmation(${user.id})" class="btn-danger">Delete</button>
-//                            </td>
-//                        </tr>
-//                    `);
-//                });
-//            }
-//            updateUserPagination();
-//        },
-//        error: function(xhr, status, error) {
-//            $('#user-loading').hide();
-//            $('#userTable').html(`<tr><td colspan='8' class='text-danger text-center'>Error: ${xhr.statusText}</td></tr>`);
-//            console.error('Fetch users error:', xhr, status, error);
-//        }
-//    });
-//}
-//
-//function updateUserPagination() {
-//    $('#userPageInfo').text(`Page ${currentUserPage} of ${totalUserPages}`);
-//    $('#userPrevBtn').prop('disabled', currentUserPage <= 1);
-//    $('#userNextBtn').prop('disabled', currentUserPage >= totalUserPages);
-//}
-//
-//function fetchUserDetails(userId) {
-//    $.ajax({
-//        url: `${USER_API_URL}${userId}/`,
-//        type: 'GET',
-//        success: function(user) {
-//            populateUserForm(user);
-//            currentUserId = user.id;
-//            $('#userFormTitle').text('Edit User');
-//            $('#passwordHint').removeClass('hidden');
-//            showSection('create-user');
-//        },
-//        error: function(xhr) {
-//            showNotification('Failed to load user details: ' + xhr.statusText, 'error');
-//            console.error('Error loading user details:', xhr);
-//        }
-//    });
-//}
-//
-//function populateUserForm(user) {
-//    $('#userId').val(user.id);
-//    $('#username').val(user.username);
-//    $('#email').val(user.email);
-//    $('#firstName').val(user.first_name || '');
-//    $('#lastName').val(user.last_name || '');
-//    $('#role').val(user.role || 'user');
-//    $('#isActive').prop('checked', user.is_active);
-//    $('#phoneNumber').val(user.phone_number || '');
-//    $('#address').val(user.address || '');
-//    $('#password').val('');
-//    $('#confirmPassword').val('');
-//}
-//
-//function showDeleteConfirmation(userId) {
-//    if (confirm('Are you sure you want to delete this user?')) {
-//        deleteUser(userId);
-//    }
-//}
-//
-//function createUser(userData) {
-//    $.ajax({
-//        url: USER_API_URL,
-//        type: 'POST',
-//        contentType: 'application/json',
-//        data: JSON.stringify(userData),
-//        headers: { 'X-CSRFToken': getCsrfToken() },
-//        success: function() {
-//            showNotification('User created successfully');
-//            resetUserForm();
-//            showSection('user-list');
-//            fetchUsers(currentUserPage);
-//        },
-//        error: function(xhr) {
-//            showNotification('Failed to create user: ' + xhr.statusText, 'error');
-//            console.error('Error creating user:', xhr);
-//        }
-//    });
-//}
-//
-//function updateUser(userId, userData) {
-//    $.ajax({
-//        url: `${USER_API_URL}${userId}/`,
-//        type: 'PUT',
-//        contentType: 'application/json',
-//        data: JSON.stringify(userData),
-//        headers: { 'X-CSRFToken': getCsrfToken() },
-//        success: function() {
-//            showNotification('User updated successfully');
-//            resetUserForm();
-//            showSection('user-list');
-//            fetchUsers(currentUserPage);
-//        },
-//        error: function(xhr) {
-//            showNotification('Failed to update user: ' + xhr.statusText, 'error');
-//            console.error('Error updating user:', xhr);
-//        }
-//    });
-//}
-//
-//function deleteUser(userId) {
-//    $.ajax({
-//        url: `${USER_API_URL}${userId}/`,
-//        type: 'DELETE',
-//        headers: { 'X-CSRFToken': getCsrfToken() },
-//        success: function() {
-//            showNotification('User deleted successfully');
-//            fetchUsers(currentUserPage);
-//        },
-//        error: function(xhr) {
-//            showNotification('Failed to delete user: ' + xhr.statusText, 'error');
-//            console.error('Error deleting user:', xhr);
-//        }
-//    });
-//}
-//
-//function gatherUserFormData() {
-//    const password = $('#password').val();
-//    const confirmPassword = $('#confirmPassword').val();
-//
-//    if (password && password !== confirmPassword) {
-//        showNotification('Passwords do not match', 'error');
-//        return null;
-//    }
-//
-//    const userData = {
-//        username: $('#username').val().trim(),
-//        email: $('#email').val().trim(),
-//        first_name: $('#firstName').val().trim(),
-//        last_name: $('#lastName').val().trim(),
-//        role: $('#role').val(),
-//        is_active: $('#isActive').is(':checked'),
-//        phone_number: $('#phoneNumber').val().trim(),
-//        address: $('#address').val().trim()
-//    };
-//
-//    if (password) userData.password = password;
-//    return userData;
-//}
-//
-//function resetUserForm() {
-//    $('#userForm')[0].reset();
-//    $('#userId').val('');
-//    currentUserId = null;
-//    $('#userFormTitle').text('Create New User');
-//    $('#passwordHint').addClass('hidden');
-//}
-//
-//let currentUserId = null;
-//
-//$('#saveUserBtn').click(function() {
-//    const userData = gatherUserFormData();
-//    if (!userData) return;
-//
-//    if (currentUserId) {
-//        updateUser(currentUserId, userData);
-//    } else {
-//        createUser(userData);
-//    }
-//});
+
 const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
 const USER_API_URL = 'http://127.0.0.1:8000/users/';
 const ITEMS_PER_PAGE = 10;
@@ -825,7 +58,7 @@ function toggleDrawer() {
 
 function logout() {
     localStorage.removeItem('adminToken');
-    window.location.href = '/adminpage';
+    window.location.replace('/adminpage');
 }
 
 function showSection(sectionId) {
@@ -1184,6 +417,105 @@ function getFarmData() {
     });
 }
 
+function loadDashboardData() {
+    $.ajax({
+        url: `${API_BASE_URL}farms/`,
+        method: 'GET',
+        success: function(response) {
+            let farms = [];
+
+            // Handle both paginated and array responses
+            if (response && response.results !== undefined) {
+                farms = response.results;
+                $('#total-farms').text(response.count || 0);
+            } else if (Array.isArray(response)) {
+                farms = response;
+                $('#total-farms').text(farms.length);
+            } else {
+                $('#total-farms').text(0);
+                return;
+            }
+
+            let totalMotors = 0;
+            let totalValves = 0;
+
+            farms.forEach(farm => {
+                if (farm.motors && Array.isArray(farm.motors)) {
+                    totalMotors += farm.motors.length;
+
+                    farm.motors.forEach(motor => {
+                        if (motor.valves && Array.isArray(motor.valves)) {
+                            totalValves += motor.valves.length;
+                        } else if (motor.valve_count) {
+                            totalValves += motor.valve_count;
+                        }
+                    });
+                }
+            });
+
+            $('#total-motors').text(totalMotors);
+            $('#total-valves').text(totalValves);
+
+            // Display recent farms (e.g., the first 3 farms)
+            displayRecentFarms(farms.slice(0, 3));
+        },
+        error: function(xhr) {
+            showNotification('Error loading farm data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
+            console.error('Error loading dashboard data:', xhr);
+            $('#total-farms').text('Error');
+            $('#total-motors').text('Error');
+            $('#total-valves').text('Error');
+            $('#recent-farms').html('<p class="text-danger">Error loading recent farms</p>');
+        }
+    });
+
+    $.ajax({
+        url: USER_API_URL,
+        method: 'GET',
+        success: function(response) {
+            // Handle both paginated and array responses
+            if (response && response.results !== undefined) {
+                $('#total-users').text(response.count || 0);
+            } else if (Array.isArray(response)) {
+                $('#total-users').text(response.length);
+            } else {
+                $('#total-users').text(0);
+            }
+        },
+        error: function(xhr) {
+            showNotification('Error loading user data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
+            console.error('Error loading user data:', xhr);
+            $('#total-users').text('Error');
+        }
+    });
+}
+
+function displayRecentFarms(farms) {
+    const recentFarmsContainer = $('#recent-farms-container');
+    recentFarmsContainer.empty();
+
+    if (!farms || farms.length === 0) {
+        recentFarmsContainer.html('<p class="text-center text-gray-500">No farms available</p>');
+        return;
+    }
+
+    farms.forEach(farm => {
+        const motorCount = farm.motors ? farm.motors.length : 0;
+        const valveCount = farm.motors ? farm.motors.reduce((sum, motor) => sum + (motor.valve_count || 0), 0) : 0;
+
+        recentFarmsContainer.append(`
+            <div class="bg-white p-4 rounded-lg shadow">
+                <h4 class="font-medium text-gray-800">${farm.name || 'Unnamed Farm'}</h4>
+                <p class="text-sm text-gray-600">Location: ${farm.location || 'Unknown'}</p>
+                <p class="text-sm text-gray-600">Owner: ${farm.owner_name || farm.owner || 'Not assigned'}</p>
+                <p class="text-sm text-gray-600">Motors: ${motorCount}</p>
+                <p class="text-sm text-gray-600">Valves: ${valveCount}</p>
+
+            </div>
+        `);
+    });
+}
+
 function displayFarmData(data) {
     let html = `
         <h3>${data.name || 'Unnamed Farm'} - ${data.location || 'Unknown Location'}</h3>
@@ -1360,6 +692,9 @@ function loadDashboardData() {
 
             $('#total-motors').text(totalMotors);
             $('#total-valves').text(totalValves);
+
+            // Display recent farms (e.g., the first 3 farms)
+            displayRecentFarms(farms.slice(0, 3));
         },
         error: function(xhr) {
             showNotification('Error loading farm data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
@@ -1367,6 +702,7 @@ function loadDashboardData() {
             $('#total-farms').text('Error');
             $('#total-motors').text('Error');
             $('#total-valves').text('Error');
+            $('#recent-farms').html('<p class="text-danger">Error loading recent farms</p>');
         }
     });
 
