@@ -1,5 +1,4 @@
 
-
 from rest_framework import serializers
 from .models import Farm, Motor, Valve
 from accounts.models import User
