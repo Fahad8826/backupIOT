@@ -195,7 +195,6 @@ body {
     font-size: 1rem;
 }
 
-/* Content Styles */
 .content {
     margin-left: 0;
     padding: 20px;
@@ -302,7 +301,7 @@ body {
 
 .btn-primary {
     background-color: var(--primary);
-    color: white;
+    color: var(--text-light);
 }
 
 .btn-primary:hover {
@@ -311,7 +310,7 @@ body {
 
 .btn-danger {
     background-color: #e74c3c;
-    color: white;
+    color: var(--text-light);
 }
 
 .btn-danger:hover {
@@ -358,7 +357,7 @@ body {
     right: 20px;
     padding: 15px;
     border-radius: 5px;
-    color: white;
+    color: var(--text-light);
     display: none;
     z-index: 2000;
 }
@@ -419,7 +418,7 @@ body {
     color: var(--text-dark);
 }
 
-
+/* Grid Utilities */
 .grid {
     display: grid;
 }
@@ -496,15 +495,84 @@ body {
     margin-bottom: 1.5rem;
 }
 
-.btn-primary {
-    background-color: #2563eb;
-    color: white;
+/* Toggle Buttons */
+.toggle-motor-btn, .toggle-valve-btn {
     padding: 0.25rem 0.75rem;
-    border-radius: 0.25rem;
+    border-radius: 5px;
     border: none;
     cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
 }
 
-.btn-primary:hover {
-    background-color: #1d4ed8;
+.toggle-motor-btn.btn-active, .toggle-valve-btn.btn-active {
+    background-color: var(--primary);
+    color: var(--text-light);
+}
+
+.toggle-motor-btn.btn-inactive, .toggle-valve-btn.btn-inactive {
+    background-color: var(--secondary);
+    color: var(--text-light);
+}
+
+.toggle-motor-btn:hover, .toggle-valve-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.toggle-motor-btn.btn-inactive:hover, .toggle-valve-btn.btn-inactive:hover {
+    background-color: var(--secondary-light);
+}
+
+/* Flex Utilities */
+.flex {
+    display: flex;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+/* Additional Spacing and Borders */
+.border-t {
+    border-top: 1px solid;
+}
+
+.border-gray-200 {
+    border-color: #e5e7eb;
+}
+
+.text-md {
+    font-size: 1rem;
+}
+
+.text-green-600 {
+    color: #16a34a;
+}
+
+.text-red-600 {
+    color: #dc2626;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
 }

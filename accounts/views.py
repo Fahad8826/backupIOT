@@ -1,8 +1,6 @@
 # views.py
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
 
 # views.py
 from rest_framework import status, generics
@@ -225,90 +223,47 @@ class AdminSignupView(APIView):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Super Admin signup view (first admin creation with master password)
-class SuperAdminSignupView(APIView):
-    permission_classes = [AllowAny]  # Anyone can access this endpoint
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        master_password = request.data.get('master_password')
-        username = request.data.get('username')
-
-        # Check master password (should be stored securely in settings or environment)
-        MASTER_PASSWORD = getattr(settings, 'MASTER_ADMIN_PASSWORD', 'master_secret_password')
-
-        if master_password != MASTER_PASSWORD:
-            return Response({
-                'error': 'Invalid master password'
-            }, status=status.HTTP_401_UNAUTHORIZED)
-
-        # Check if any admin already exists
-        if User.objects.filter(is_superuser=True).exists():
-            return Response({
-                'error': 'Super admin already exists. Use regular admin signup.'
-            }, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create first super admin
-        try:
-            # Handle both username-based and email-based User models
-            if hasattr(User, 'username') and User._meta.get_field('username').unique:
-                if not username:
-                    username = email.split('@')[0]
-
-                admin_user = User.objects.create(
-                    username=username,
-                    email=email,
-                    is_staff=True,
-                    is_superuser=True
-                )
-            else:
-                admin_user = User.objects.create(
-                    email=email,
-                    is_staff=True,
-                    is_superuser=True
-                )
-
-            if hasattr(admin_user, 'role'):
-                admin_user.role = 'admin'
-
-            admin_user.set_password(password)
-            admin_user.save()
-
-            token, created = Token.objects.get_or_create(user=admin_user)
-
-            return Response({
-                'message': 'Super admin created successfully',
-                'email': email,
-                'token': token.key
-            }, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            return Response({
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# Template view for admin signup page
-@ensure_csrf_cookie
 def admin_signup_page(request):
-    # Check if user is already authenticated as admin
-    is_admin = request.user.is_authenticated and request.user.is_staff
-    # Check if any admin exists
-    admin_exists = User.objects.filter(is_superuser=True).exists()
-
-    context = {
-        'is_admin': is_admin,
-        'admin_exists': admin_exists
-    }
-
-    return render(request, 'admin_signup.html', context)
+    return render(request, 'admin_signup.html', )
 # ---------------------------------------User CRUD Orignial ADMIN------------------------------------
+
+
+from rest_framework import generics, status
+from rest_framework.permissions import AllowAny  # Changed from IsAdminUser
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
+from .serializers import UserSerializer
+
+User = get_user_model()
 
 
 class UserListCreateView(generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [AllowAny]  # Allow anyone to create users
+
+    def perform_create(self, serializer):
+        user = serializer.save()
+        Token.objects.get_or_create(user=user)  # Still create a token for the new user
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        self.perform_create(serializer)
+        token, _ = Token.objects.get_or_create(user=serializer.instance)
+
+        response_data = {
+            'message': 'User created successfully',
+            'user_id': serializer.instance.id,
+            'email': serializer.instance.email,
+            'username': serializer.instance.username,
+            'role': serializer.instance.role,
+            'token': token.key
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -317,6 +272,15 @@ class UserRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 def user_management_ui(request):
     # Render the HTML template
     return render(request, 'users_managment.html')
+
+
+# Add the template view for the user creation page
+
+def user_create_page(request):
+    return render(request, 'user_create.html')
+
+
+
 
 # -------------------------------USER SIDE API----------------------------------------
 

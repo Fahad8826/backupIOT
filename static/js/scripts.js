@@ -510,7 +510,6 @@ function displayRecentFarms(farms) {
                 <p class="text-sm text-gray-600">Owner: ${farm.owner_name || farm.owner || 'Not assigned'}</p>
                 <p class="text-sm text-gray-600">Motors: ${motorCount}</p>
                 <p class="text-sm text-gray-600">Valves: ${valveCount}</p>
-
             </div>
         `);
     });
@@ -518,49 +517,86 @@ function displayRecentFarms(farms) {
 
 function displayFarmData(data) {
     let html = `
-        <h3>${data.name || 'Unnamed Farm'} - ${data.location || 'Unknown Location'}</h3>
-        <p>Owner: ${data.owner_name || data.owner || 'Not assigned'}</p>
-        <h4 class="mt-4">Motors and Valves:</h4>
+        <h3 class="text-lg font-semibold mb-2">${data.name || 'Unnamed Farm'} - ${data.location || 'Unknown Location'}</h3>
+        <p class="text-sm text-gray-600 mb-4">Owner: ${data.owner_name || data.owner || 'Not assigned'}</p>
+        <h4 class="text-md font-semibold mt-4 mb-2">Motors and Valves:</h4>
     `;
 
-    // Check if motors exists and is an array
     if (data.motors && Array.isArray(data.motors) && data.motors.length > 0) {
         data.motors.forEach(motor => {
             html += `
-                <div class="p-4 bg-white rounded-lg shadow mt-2">
-                    <h4>Motor ${motor.id} (${motor.motor_type || 'Unknown type'}) - ${motor.valve_count || 0} valves - Status: ${motor.is_active ? 'On' : 'Off'}</h4>
-                    <div class="flex gap-2 mt-2">
-                        <button onclick="editMotor(${motor.id}, ${data.id})" class="btn-primary">Edit</button>
-                        <button onclick="deleteMotor(${motor.id}, ${data.id})" class="btn-danger">Delete</button>
-                        <button onclick="toggleMotor(${motor.id}, ${motor.is_active ? 1 : 0})" class="${motor.is_active ? 'btn-danger' : 'btn-primary'}">${motor.is_active ? 'Turn Off' : 'Turn On'}</button>
+                <div class="p-4 bg-white rounded-lg shadow mt-4">
+                    <h4 class="text-md font-medium text-gray-800 mb-2">
+                        Motor ${motor.id} (${motor.motor_type || 'Unknown type'}) - ${motor.valve_count || 0} valves -
+                        Status: <span class="${motor.is_active ? 'text-green-600' : 'text-red-600'}">${motor.is_active ? 'On' : 'Off'}</span>
+                    </h4>
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="editMotor(${motor.id}, ${data.id})" class="btn-primary text-sm py-1 px-3 fixed-width-btn">Edit</button>
+                        <button onclick="deleteMotor(${motor.id}, ${data.id})" class="btn-danger text-sm py-1 px-3 fixed-width-btn">Delete</button>
+                        <button onclick="toggleMotor(${motor.id}, ${motor.is_active ? 1 : 0})"
+                                class="toggle-motor-btn ${motor.is_active ? 'btn-active' : 'btn-inactive'} text-sm py-1 px-3 fixed-width-btn"
+                                data-motor-id="${motor.id}">
+                            ${motor.is_active ? 'Turn Off' : 'Turn On'}
+                        </button>
                     </div>
             `;
 
-            // Check if valves exists and is an array
             if (motor.valves && Array.isArray(motor.valves) && motor.valves.length > 0) {
+                html += `<div class="mt-3">`;
                 motor.valves.forEach(valve => {
                     html += `
-                        <div class="flex items-center gap-2 mt-1 valve">
-                            ${valve.name || `Valve ${valve.id}`} (ID: ${valve.id}) - Status: ${valve.is_active ? 'Active' : 'Inactive'}
-                            <button onclick="toggleValve(${valve.id}, ${valve.is_active ? 1 : 0})" class="btn-primary">Toggle</button>
+                        <div class="flex items-center justify-between gap-3 mt-2 py-2 border-t border-gray-200">
+                            <span class="text-sm text-gray-600 flex-1 truncate">
+                                ${valve.name || `Valve ${valve.id}`} (ID: ${valve.id}) -
+                                Status: <span class="${valve.is_active ? 'text-green-600' : 'text-red-600'}">${valve.is_active ? 'Active' : 'Inactive'}</span>
+                            </span>
+                            <button onclick="toggleValve(${valve.id}, ${valve.is_active ? 1 : 0})"
+                                    class="toggle-valve-btn ${valve.is_active ? 'btn-active' : 'btn-inactive'} text-sm py-1 px-3 fixed-width-btn"
+                                    data-valve-id="${valve.id}">
+                                Toggle
+                            </button>
                         </div>
                     `;
                 });
+                html += `</div>`;
             } else {
-                html += `<p>No valves assigned yet</p>`;
+                html += `<p class="text-sm text-gray-600 mt-2">No valves assigned yet</p>`;
             }
             html += `</div>`;
         });
     } else {
-        html += `<p>No motors assigned to this farm</p>`;
+        html += `<p class="text-sm text-gray-600">No motors assigned to this farm</p>`;
     }
     $('#farm-data').html(html);
 }
 
+function toggleMotor(motorId, currentStatus) {
+    const newStatus = currentStatus ? 0 : 1;
+    const $button = $(`.toggle-motor-btn[data-motor-id="${motorId}"]`);
+
+    $.ajax({
+        url: `${API_BASE_URL}motors/${motorId}/`,
+        method: 'PATCH',
+        contentType: 'application/json',
+        data: JSON.stringify({ is_active: newStatus }),
+        success: function() {
+            showNotification(`Motor ${motorId} ${newStatus ? 'activated' : 'deactivated'} successfully`);
+            // Update button text and class
+            $button.text(newStatus ? 'Turn Off' : 'Turn On');
+            $button.removeClass(newStatus ? 'btn-inactive' : 'btn-active');
+            $button.addClass(newStatus ? 'btn-active' : 'btn-inactive');
+            getFarmData(); // Refresh farm data
+        },
+        error: function(xhr) {
+            showNotification('Error toggling motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
+            console.error('Error toggling motor:', xhr);
+        }
+    });
+}
+
 function toggleValve(valveId, currentStatus) {
     const newStatus = currentStatus ? 0 : 1;
-
-    // Find the valve element to extract its name
+    const $button = $(`.toggle-valve-btn[data-valve-id="${valveId}"]`);
     const valveElement = $(`.valve:contains("(ID: ${valveId}")`);
     let valveName = `Valve ${valveId}`;
 
@@ -574,7 +610,7 @@ function toggleValve(valveId, currentStatus) {
 
     $.ajax({
         url: `${API_BASE_URL}valves/${valveId}/`,
-        method: 'PATCH', // Use PATCH instead of PUT for partial updates
+        method: 'PATCH',
         contentType: 'application/json',
         data: JSON.stringify({
             name: valveName,
@@ -582,7 +618,10 @@ function toggleValve(valveId, currentStatus) {
         }),
         success: function() {
             showNotification(`Valve ${valveId} ${newStatus ? 'activated' : 'deactivated'} successfully`);
-            getFarmData(); // Refresh farm data display
+            // Update button class
+            $button.removeClass(newStatus ? 'btn-inactive' : 'btn-active');
+            $button.addClass(newStatus ? 'btn-active' : 'btn-inactive');
+            getFarmData(); // Refresh farm data
         },
         error: function(xhr) {
             showNotification('Error toggling valve: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
@@ -591,23 +630,6 @@ function toggleValve(valveId, currentStatus) {
     });
 }
 
-function toggleMotor(motorId, currentStatus) {
-    const newStatus = currentStatus ? 0 : 1;
-    $.ajax({
-        url: `${API_BASE_URL}motors/${motorId}/`,
-        method: 'PATCH',
-        contentType: 'application/json',
-        data: JSON.stringify({ is_active: newStatus }),
-        success: function() {
-            showNotification(`Motor ${motorId} ${newStatus ? 'activated' : 'deactivated'} successfully`);
-            getFarmData(); // Refresh farm data
-        },
-        error: function(xhr) {
-            showNotification('Error toggling motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
-            console.error('Error toggling motor:', xhr);
-        }
-    });
-}
 
 function editMotor(motorId, farmId) {
     $.ajax({
