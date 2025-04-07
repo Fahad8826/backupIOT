@@ -6,7 +6,7 @@ const ITEMS_PER_PAGE = 10;
 $(document).ready(function() {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-        window.location.href = '/adminpage';
+        window.location.href = '/';
         return;
     }
 
@@ -58,7 +58,7 @@ function toggleDrawer() {
 
 function logout() {
     localStorage.removeItem('adminToken');
-    window.location.replace('/adminpage');
+    window.location.replace('/');
 }
 
 function showSection(sectionId) {

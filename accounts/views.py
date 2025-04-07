@@ -3,14 +3,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 
 # views.py
-from rest_framework import status, generics
+
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model, authenticate
-from rest_framework.authtoken.models import Token  # Ensure this import is correct
-from AdminIOT import settings
-from accounts.serializers import UserSerializer
+
 
 User = get_user_model()
 

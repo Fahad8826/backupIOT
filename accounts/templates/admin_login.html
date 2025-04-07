@@ -48,67 +48,72 @@
             margin-top: 15px;
         }
     </style>
-    <script>
-        $(document).ready(function() {
-            // Check if user is already logged in
-            if (localStorage.getItem('adminToken')) {
-                window.location.href = '/admin-dashboard/';
-            }
+   <script>
+    $(document).ready(function() {
+        // Check if user is already logged in
+        if (localStorage.getItem('adminToken')) {
+            window.location.href = '/admin-dashboard/';
+        }
 
-            $('#login-form').submit(function(e) {
-                e.preventDefault();
+        $('#login-form').submit(function(e) {
+            e.preventDefault();
 
-                const email = $('#email').val();
-                const password = $('#password').val();
+            const email = $('#email').val();
+            const password = $('#password').val();
 
-                // Show loading state
-                $('#login-btn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...');
-                $('#login-btn').prop('disabled', true);
+            // Show loading state
+            $('#login-btn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...');
+            $('#login-btn').prop('disabled', true);
 
-                $.ajax({
-                    url: '/api/admin/login/',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({
-                        email: email,
-                        password: password
-                    }),
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
-                    success: function(response) {
-                        localStorage.setItem('adminToken', response.token);
-                        $('.login-feedback').html('<div class="alert alert-success">Login successful! Redirecting...</div>');
-                        setTimeout(function() {
-                            window.location.href = '/admin-dashboard/';
-                        }, 1000);
-                    },
-                    error: function(xhr) {
-                        $('#login-btn').html('Sign In');
-                        $('#login-btn').prop('disabled', false);
-                        $('.login-feedback').html('<div class="alert alert-danger">' +
-                            (xhr.responseJSON?.error || 'Login failed. Please check your credentials.') + '</div>');
-                    }
-                });
+            $.ajax({
+                url: '/api/admin/login/',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    email: email,
+                    password: password
+                }),
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function(response) {
+                    // On success, store the token and show success message
+                    localStorage.setItem('adminToken', response.token);
+                    $('.login-feedback').html('<div class="alert alert-success">Login successful! Redirecting...</div>');
+                    
+                    // Wait 1 second before redirecting
+                    setTimeout(function() {
+                        window.location.href = '/admin-dashboard/';
+                    }, 1000);
+                },
+                error: function(xhr) {
+                    // On error, revert button to normal and show error message
+                    $('#login-btn').html('Sign In');
+                    $('#login-btn').prop('disabled', false);
+                    $('.login-feedback').html('<div class="alert alert-danger">' +
+                        (xhr.responseJSON?.error || 'Login failed. Please check your credentials.') + '</div>');
+                }
             });
+        });
 
-            // Function to get CSRF token from cookies
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
                     }
                 }
-                return cookieValue;
             }
-        });
-    </script>
+            return cookieValue;
+        }
+    });
+</script>
+
 </head>
 <body>
     <div class="login-container">
