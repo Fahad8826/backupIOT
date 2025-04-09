@@ -22,11 +22,7 @@ urlpatterns = [
 
 
     path('api/admin/signup/', AdminSignupView.as_view(), name='admin-signup'),
-
     path('admin-signup/', admin_signup_page, name='admin-signup-page'),
-
-
-
     path('users/create/', user_create_page, name='user-create-page'),
 
     # -------------user auth flutter---------------------
