@@ -57,6 +57,7 @@ class Motor(models.Model):
         return f"{self.motor_type} Motor - {self.farm.name}"
 
 class Valve(models.Model):
+    valve_id = models.PositiveIntegerField(null=True)
     motor = models.ForeignKey(Motor, on_delete=models.CASCADE, related_name='valves')
     name = models.CharField(max_length=50)
     is_active = models.BooleanField(default=False)

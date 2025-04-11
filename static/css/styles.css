@@ -289,6 +289,13 @@ body {
     margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-container input:focus, .form-container select:focus {
+    border-color: var(--primary);
+    outline: none;
 }
 
 .form-container button {
@@ -399,6 +406,8 @@ body {
 
 .text-danger {
     color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 4px;
 }
 
 .hidden {
@@ -575,4 +584,67 @@ body {
 
 .mb-2 {
     margin-bottom: 0.5rem;
+}
+
+/* Valve Input Styles */
+.valve-inputs {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #eee;
+}
+
+.valve-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.valve-input input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.valve-input input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.valve-input .btn-danger {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+/* Error Input Styles */
+.error-input {
+    border: 1px solid #e74c3c !important;
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.text-danger {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .valve-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .valve-input input {
+        width: 100%;
+    }
+
+    .valve-input .btn-danger {
+        width: fit-content;
+        align-self: flex-end;
+    }
 }

@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 class ValveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Valve
-        fields = ['id', 'name', 'is_active']
+        fields = ['id', 'name', 'is_active','valve_id']
         extra_kwargs = {
             'name': {'required': False},
             'is_active': {'required': True}

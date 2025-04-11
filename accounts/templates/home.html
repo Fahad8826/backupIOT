@@ -260,10 +260,10 @@
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        
+
 const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
 const USER_API_URL = 'http://127.0.0.1:8000/users/';
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 7;
 
 $(document).ready(function() {
     const token = localStorage.getItem('adminToken');
@@ -297,6 +297,11 @@ $(document).ready(function() {
     $('#userSearch').on('input', debounce(() => fetchUsers(1), 300));
     $('#userPrevBtn').click(() => fetchUsers(currentUserPage - 1));
     $('#userNextBtn').click(() => fetchUsers(currentUserPage + 1));
+
+    $('#phoneNumber').on('blur', function() {
+        const phoneNumber = $(this).val().trim();
+        checkPhoneNumber(phoneNumber, currentUserId);
+    });
 
     // Initialize active section
     showSection('dashboard');
@@ -392,23 +397,81 @@ let motorCount = 0;
 
 function addMotorInput(motor = null) {
     motorCount++;
+    const motorId = motor?.id || '';
+    const valveCountValue = motor?.valve_count || '';
+    const valves = motor?.valves || [];
+
+    let valveInputs = '';
+    if (motor && valves.length > 0) {
+        // Populate existing valves
+        valves.forEach((valve, index) => {
+            valveInputs += `
+                <div class="valve-input flex gap-4 mb-2" id="valve-${motorCount}-${index + 1}">
+                    <input type="text" id="valve-name-${motorCount}-${index + 1}"
+                           placeholder="Valve Name" value="${valve.name || ''}" class="flex-1">
+                    <input type="number" id="valve-id-${motorCount}-${index + 1}"
+                           placeholder="Valve ID" value="${valve.valve_id || ''}" class="flex-1"
+                           onblur="checkValveId(${motorCount}, ${index + 1}, '${valve.id || ''}')">
+                    <button type="button" onclick="$(this).closest('.valve-input').remove()"
+                            class="btn-danger">Remove Valve</button>
+                </div>
+            `;
+        });
+    }
+
     const motorHtml = `
-        <div class="motor-input flex gap-4 mb-4" id="motor-${motorCount}">
-            <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}"
-                   placeholder="UIN" class="flex-1" onblur="checkUIN(${motorCount}, '${motor?.id || ''}')">
-            <input type="hidden" id="motor-id-${motorCount}" value="${motor?.id || ''}">
-            <select id="motor-type-${motorCount}" class="flex-1">
-                <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>
-                <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>
-                <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>
-            </select>
-            <input type="number" id="valve-count-${motorCount}"
-                   placeholder="Valve Count" min="1" value="${motor?.valve_count || ''}" class="flex-1">
-            <button type="button" onclick="$(this).closest('.motor-input').remove()"
-                    class="btn-danger">Remove</button>
+        <div class="motor-input flex gap-4 mb-4 flex-col" id="motor-${motorCount}">
+            <div class="flex gap-4">
+                <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}"
+                       placeholder="UIN" class="flex-1" onblur="checkUIN(${motorCount}, '${motorId}')">
+                <input type="hidden" id="motor-id-${motorCount}" value="${motorId}">
+                <select id="motor-type-${motorCount}" class="flex-1">
+                    <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>
+                    <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>
+                    <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>
+                </select>
+                <input type="number" id="valve-count-${motorCount}"
+                       placeholder="Valve Count" min="1" value="${valveCountValue}" class="flex-1"
+                       onchange="updateValveInputs(${motorCount})">
+                <button type="button" onclick="$(this).closest('.motor-input').remove()"
+                        class="btn-danger">Remove Motor</button>
+            </div>
+            <div id="valve-inputs-${motorCount}" class="valve-inputs ml-4">
+                ${valveInputs}
+            </div>
         </div>
     `;
     $('#motor-inputs').append(motorHtml);
+
+    // If no valves were provided, initialize based on valve_count
+    if (!motor || valves.length === 0) {
+        updateValveInputs(motorCount);
+    }
+}
+
+function updateValveInputs(motorIndex) {
+    const valveCountInput = $(`#valve-count-${motorIndex}`);
+    let valveCount = parseInt(valveCountInput.val()) || 0;
+    const valveInputsContainer = $(`#valve-inputs-${motorIndex}`);
+
+    // Clear existing valve inputs
+    valveInputsContainer.empty();
+
+    // Generate new valve inputs based on valve_count
+    for (let i = 1; i <= valveCount; i++) {
+        const valveHtml = `
+            <div class="valve-input flex gap-4 mb-2" id="valve-${motorIndex}-${i}">
+                <input type="text" id="valve-name-${motorIndex}-${i}"
+                       placeholder="Valve Name" class="flex-1">
+                <input type="number" id="valve-id-${motorIndex}-${i}"
+                       placeholder="Valve ID" class="flex-1"
+                       onblur="checkValveId(${motorIndex}, ${i})">
+                <button type="button" onclick="$(this).closest('.valve-input').remove()"
+                        class="btn-danger">Remove Valve</button>
+            </div>
+        `;
+        valveInputsContainer.append(valveHtml);
+    }
 }
 
 function checkUIN(count, currentMotorId) {
@@ -446,6 +509,7 @@ function saveFarm() {
         const motorUIN = $(this).find('[id^="UIN-"]').val();
         const motorType = $(this).find('[id^="motor-type-"]').val();
         const valveCount = parseInt($(this).find('[id^="valve-count-"]').val()) || 0;
+        const motorIndex = $(this).attr('id').split('-')[1];
 
         if (valveCount < 1) {
             showNotification('Valve count must be at least 1', 'error');
@@ -453,10 +517,44 @@ function saveFarm() {
             return false;
         }
 
+        // Collect valve data
+        const valves = [];
+        for (let i = 1; i <= valveCount; i++) {
+            const valveNameInput = $(`#valve-name-${motorIndex}-${i}`);
+            const valveIdInput = $(`#valve-id-${motorIndex}-${i}`);
+            if (valveNameInput.length && valveIdInput.length) {
+                const valveName = valveNameInput.val().trim();
+                const valveId = valveIdInput.val().trim();
+                if (!valveName || !valveId) {
+                    showNotification(`Please provide both name and ID for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');
+                    hasError = true;
+                    return false;
+                }
+                // Check for validation error
+                if ($(`#valve-id-error-${motorIndex}-${i}`).length) {
+                    showNotification(`Please resolve Valve ID error for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');
+                    hasError = true;
+                    return false;
+                }
+                valves.push({
+                    name: valveName,
+                    valve_id: parseInt(valveId),
+                    is_active: false // Default to inactive; adjust as needed
+                });
+            }
+        }
+
+        if (valves.length !== valveCount) {
+            showNotification(`Number of valves provided does not match valve count for motor ${motorUIN || 'UIN not set'}`, 'error');
+            hasError = true;
+            return false;
+        }
+
         const motorObject = {
             motor_type: motorType,
             valve_count: valveCount,
-            UIN: motorUIN || null
+            UIN: motorUIN || null,
+            valves: valves
         };
         if (motorId) motorObject.id = motorId;
         motors.push(motorObject);
@@ -488,9 +586,14 @@ function saveFarm() {
             const error = xhr.responseJSON || {};
             let message = 'Error saving farm: ';
             if (error.motors) {
-                message += error.motors.map((m, i) => `Motor ${i+1}: ${m.UIN?.[0] || 'Invalid data'}`).join('; ');
+                message += error.motors.map((m, i) => {
+                    if (m.valves) {
+                        return `Motor ${i+1}: ${m.valves.map((v, vi) => `Valve ${vi+1}: ${v.name?.[0] || v.valve_id?.[0] || 'Invalid data'}`).join('; ')}`;
+                    }
+                    return `Motor ${i+1}: ${m.UIN?.[0] || 'Invalid data'}`;
+                }).join('; ');
             } else {
-                message += xhr.statusText;
+                message += error.detail || xhr.statusText;
             }
             showNotification(message, 'error');
             console.error('Error saving farm:', xhr);
@@ -809,7 +912,7 @@ function displayFarmData(data) {
                     html += `
                         <div class="flex items-center justify-between gap-3 mt-2 py-2 border-t border-gray-200">
                             <span class="text-sm text-gray-600 flex-1 truncate">
-                                ${valve.name || `Valve ${valve.id}`} (ID: ${valve.id}) -
+                                ${valve.name || `Valve ${valve.id}`} (Valve ID: ${valve.valve_id || 'N/A'}, ID: ${valve.id}) -
                                 Status: <span class="${valve.is_active ? 'text-green-600' : 'text-red-600'}">${valve.is_active ? 'Active' : 'Inactive'}</span>
                             </span>
                             <button onclick="toggleValve(${valve.id}, ${valve.is_active ? 1 : 0})"
@@ -899,17 +1002,24 @@ function editMotor(motorId, farmId) {
         method: 'GET',
         success: function(motor) {
             editFarm(farmId);
-            // Use setTimeout to ensure the farm edit form is populated first
             setTimeout(() => {
                 for (let i = 1; i <= motorCount; i++) {
                     if ($(`#motor-id-${i}`).val() == motorId) {
                         $(`#UIN-${i}`).val(motor.UIN);
                         $(`#motor-type-${i}`).val(motor.motor_type);
                         $(`#valve-count-${i}`).val(motor.valve_count);
+                        updateValveInputs(i);
+                        // Populate valve inputs
+                        motor.valves.forEach((valve, index) => {
+                            $(`#valve-name-${i}-${index + 1}`).val(valve.name);
+                            $(`#valve-id-${i}-${index + 1}`).val(valve.valve_id);
+                            // Trigger validation for existing valve_id
+                            checkValveId(i, index + 1, valve.id);
+                        });
                         break;
                     }
                 }
-            }, 300); // Increased timeout to ensure farm edit form is loaded
+            }, 300);
         },
         error: function(xhr) {
             showNotification('Error loading motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
@@ -1140,6 +1250,8 @@ function populateUserForm(user) {
     $('#role').val(user.role || 'user');
     $('#isActive').prop('checked', user.is_active);
     $('#phoneNumber').val(user.phone_number || '');
+    $('#phoneNumber').removeClass('error-input');
+    $('#phone-error').hide();
     $('#address').val(user.address || '');
     $('#password').val('');
     $('#confirmPassword').val('');
@@ -1207,12 +1319,59 @@ function deleteUser(userId) {
     });
 }
 
+// Add this function to check if phone number exists
+function checkPhoneNumber(phoneNumber, currentUserId = null) {
+    if (!phoneNumber) return; // Don't validate empty phone numbers
+
+    $.ajax({
+        url: USER_API_URL,
+        method: 'GET',
+        success: function(response) {
+            // Handle both paginated and array responses
+            let users = [];
+            if (response && response.results !== undefined) {
+                users = response.results;
+            } else if (Array.isArray(response)) {
+                users = response;
+            }
+
+            // Check if phone number exists for another user
+            const existingUser = users.find(user =>
+                user.phone_number === phoneNumber &&
+                user.id != currentUserId // Exclude current user when editing
+            );
+
+            if (existingUser) {
+                showNotification(`Phone number ${phoneNumber} is already taken by another user`, 'error');
+                $('#phoneNumber').addClass('error-input');
+                // Create or show error message element
+                if ($('#phone-error').length === 0) {
+                    $('#phoneNumber').after('<div id="phone-error" class="text-danger">Phone number already taken</div>');
+                } else {
+                    $('#phone-error').show();
+                }
+            } else {
+                $('#phoneNumber').removeClass('error-input');
+                $('#phone-error').hide();
+            }
+        },
+        error: function(xhr) {
+            console.error('Error checking phone number:', xhr);
+        }
+    });
+}
+
 function gatherUserFormData() {
     const password = $('#password').val();
     const confirmPassword = $('#confirmPassword').val();
 
     if (password && password !== confirmPassword) {
         showNotification('Passwords do not match', 'error');
+        return null;
+    }
+
+    if ($('#phone-error').is(':visible')) {
+        showNotification('Please fix the phone number issue before saving', 'error');
         return null;
     }
 
@@ -1237,6 +1396,8 @@ function resetUserForm() {
     currentUserId = null;
     $('#userFormTitle').text('Create New User');
     $('#passwordHint').addClass('hidden');
+    $('#phoneNumber').removeClass('error-input');
+    $('#phone-error').hide();
 }
 
 let currentUserId = null;
@@ -1251,6 +1412,37 @@ $('#saveUserBtn').click(function() {
         createUser(userData);
     }
 });
+
+function checkValveId(motorIndex, valveIndex, currentValveId = '') {
+    const valveIdInput = $(`#valve-id-${motorIndex}-${valveIndex}`);
+    const valveIdValue = valveIdInput.val().trim();
+    if (!valveIdValue) return;
+
+    $.ajax({
+        url: `${API_BASE_URL}valves/`,
+        method: 'GET',
+        success: function(valves) {
+            // Handle potential paginated response
+            const valveList = Array.isArray(valves) ? valves : (valves.results || []);
+
+            const existingValve = valveList.find(valve => valve.valve_id == valveIdValue && valve.id != currentValveId);
+            if (existingValve) {
+                showNotification(`Valve ID ${valveIdValue} is already taken by Valve ID: ${existingValve.id}`, 'error');
+                valveIdInput.val('');
+                valveIdInput.addClass('error-input');
+                valveIdInput.after(`<div id="valve-id-error-${motorIndex}-${valveIndex}" class="text-danger">Valve ID already taken</div>`);
+            } else {
+                valveIdInput.removeClass('error-input');
+                $(`#valve-id-error-${motorIndex}-${valveIndex}`).remove();
+            }
+        },
+        error: function(xhr) {
+            showNotification(`Error checking Valve ID: ${xhr.statusText}`, 'error');
+            console.error('Error checking Valve ID:', xhr);
+        }
+    });
+}
+
 
     </script>
 </body>
