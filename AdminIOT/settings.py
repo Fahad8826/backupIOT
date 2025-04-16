@@ -150,8 +150,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # For collectstatic in prod
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
-# Not recommended to store plaintext passwords
-MASTER_ADMIN_PASSWORD = 'admin'
+
 
 AUTHENTICATION_BACKENDS = [
     'accounts.authentication.PhoneNumberBackend',  # Custom authentication backend

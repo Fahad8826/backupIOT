@@ -45,6 +45,11 @@
             <button class="header-btn btn btn-primary" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </button>
+            <button class="header-btn px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md transition duration-200 ease-in-out flex items-center gap-2"
+            onclick="refreshCurrentView()">
+            <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+
         </div>
     </div>
 
@@ -265,6 +270,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
 const USER_API_URL = 'http://127.0.0.1:8000/users/';
 const ITEMS_PER_PAGE = 7;
 
+
 $(document).ready(function() {
     const token = localStorage.getItem('adminToken');
     if (!token) {
@@ -406,48 +412,75 @@ function addMotorInput(motor = null) {
         // Populate existing valves
         valves.forEach((valve, index) => {
             valveInputs += `
-                <div class="valve-input flex gap-4 mb-2" id="valve-${motorCount}-${index + 1}">
+                <div class="valve-input flex gap-4 mb-2 items-center" id="valve-${motorCount}-${index + 1}">
                     <input type="text" id="valve-name-${motorCount}-${index + 1}"
                            placeholder="Valve Name" value="${valve.name || ''}" class="flex-1">
                     <input type="number" id="valve-id-${motorCount}-${index + 1}"
                            placeholder="Valve ID" value="${valve.valve_id || ''}" class="flex-1"
                            onblur="checkValveId(${motorCount}, ${index + 1}, '${valve.id || ''}')">
-                    <button type="button" onclick="$(this).closest('.valve-input').remove()"
-                            class="btn-danger">Remove Valve</button>
+                    <button type="button" onclick="$(this).closest('.valve-input').remove()" class="btn-danger">Remove Valve</button>
                 </div>
             `;
         });
     }
 
     const motorHtml = `
-        <div class="motor-input flex gap-4 mb-4 flex-col" id="motor-${motorCount}">
-            <div class="flex gap-4">
+        <div class="motor-input border p-4 mb-6 rounded bg-gray-100" id="motor-${motorCount}">
+            <!-- Motor Fields -->
+            <div class="motor-fields flex flex-wrap gap-4 items-center">
                 <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}"
-                       placeholder="UIN" class="flex-1" onblur="checkUIN(${motorCount}, '${motorId}')">
+                       placeholder="UIN" class="flex-1 min-w-[150px]" onblur="checkUIN(${motorCount}, '${motorId}')">
                 <input type="hidden" id="motor-id-${motorCount}" value="${motorId}">
-                <select id="motor-type-${motorCount}" class="flex-1">
+                <select id="motor-type-${motorCount}" class="flex-1 min-w-[150px]" onchange="handleMotorTypeChange(${motorCount})">
                     <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>
                     <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>
                     <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>
                 </select>
                 <input type="number" id="valve-count-${motorCount}"
-                       placeholder="Valve Count" min="1" value="${valveCountValue}" class="flex-1"
+                       placeholder="Valve Count" min="1" value="${valveCountValue}" class="flex-1 min-w-[150px]"
                        onchange="updateValveInputs(${motorCount})">
-                <button type="button" onclick="$(this).closest('.motor-input').remove()"
-                        class="btn-danger">Remove Motor</button>
+                <button type="button" onclick="$(this).closest('.motor-input').remove()" class="btn-danger">Remove Motor</button>
             </div>
-            <div id="valve-inputs-${motorCount}" class="valve-inputs ml-4">
+
+            <!-- Valve Inputs Section -->
+            <div id="valve-inputs-${motorCount}" class="valve-inputs mt-4 ml-4">
                 ${valveInputs}
             </div>
         </div>
     `;
+
     $('#motor-inputs').append(motorHtml);
+    handleMotorTypeChange(motorCount);
 
     // If no valves were provided, initialize based on valve_count
     if (!motor || valves.length === 0) {
         updateValveInputs(motorCount);
     }
 }
+
+
+function handleMotorTypeChange(motorIndex) {
+    const type = $(`#motor-type-${motorIndex}`).val();
+    const valveCountInput = $(`#valve-count-${motorIndex}`);
+    let maxValves = 8; // default
+
+    if (type === 'single_phase') {
+        maxValves = 3;
+    } else if (type === 'double_phase') {
+        maxValves = 6;
+    } else if (type === 'triple_phase') {
+        maxValves = 8;
+    }
+
+    valveCountInput.attr('max', maxValves);
+
+    // Optional: Enforce the current value to not exceed max
+    if (parseInt(valveCountInput.val()) > maxValves) {
+        valveCountInput.val(maxValves);
+        updateValveInputs(motorIndex); // Optional: re-render valves
+    }
+}
+
 
 function updateValveInputs(motorIndex) {
     const valveCountInput = $(`#valve-count-${motorIndex}`);
@@ -953,40 +986,29 @@ function toggleMotor(motorId, currentStatus) {
             getFarmData(); // Refresh farm data
         },
         error: function(xhr) {
-            showNotification('Error toggling motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
+            showNotification('Error toggling motor: activate atleast 1 valve');
             console.error('Error toggling motor:', xhr);
         }
     });
 }
 
+
 function toggleValve(valveId, currentStatus) {
     const newStatus = currentStatus ? 0 : 1;
     const $button = $(`.toggle-valve-btn[data-valve-id="${valveId}"]`);
-    const valveElement = $(`.valve:contains("(ID: ${valveId}")`);
-    let valveName = `Valve ${valveId}`;
-
-    if (valveElement.length > 0) {
-        const valveText = valveElement.text();
-        const valveNameMatch = valveText.match(/^(.*?)\s*\(ID:/);
-        if (valveNameMatch && valveNameMatch[1]) {
-            valveName = valveNameMatch[1].trim();
-        }
-    }
 
     $.ajax({
         url: `${API_BASE_URL}valves/${valveId}/`,
         method: 'PATCH',
         contentType: 'application/json',
         data: JSON.stringify({
-            name: valveName,
             is_active: newStatus
         }),
         success: function() {
             showNotification(`Valve ${valveId} ${newStatus ? 'activated' : 'deactivated'} successfully`);
-            // Update button class
             $button.removeClass(newStatus ? 'btn-inactive' : 'btn-active');
             $button.addClass(newStatus ? 'btn-active' : 'btn-inactive');
-            getFarmData(); // Refresh farm data
+            getFarmData();
         },
         error: function(xhr) {
             showNotification('Error toggling valve: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
@@ -994,6 +1016,7 @@ function toggleValve(valveId, currentStatus) {
         }
     });
 }
+
 
 
 function editMotor(motorId, farmId) {
@@ -1443,7 +1466,74 @@ function checkValveId(motorIndex, valveIndex, currentValveId = '') {
     });
 }
 
+function refreshCurrentView() {
+    const refreshBtn = $('button[onclick="refreshCurrentView()"]');
+    const icon = refreshBtn.find('i');
 
+    // Add spinning animation
+    icon.addClass('refreshing');
+
+    const activeSection = $('.section.active').attr('id');
+
+    if (!activeSection) {
+        showNotification('No active section to refresh', 'error');
+        icon.removeClass('refreshing');
+        return;
+    }
+
+    // Map section IDs to their refresh functions
+    const refreshHandlers = {
+        'dashboard-section': loadDashboardData,
+        'create-farm-section': function() {
+            // For create/edit farm form, we want to reset the form
+            if (confirm('Refresh will clear all unsaved changes. Continue?')) {
+                const farmId = $('#farm-edit-id').val();
+                if (farmId) {
+                    // If editing, reload the farm data
+                    editFarm(farmId);
+                } else {
+                    // If creating, reset the form
+                    resetFarmForm();
+                }
+            }
+        },
+        'farm-list-section': function() { fetchFarms(currentFarmPage); },
+        'farm-details-section': function() {
+            const farmId = $('#farm-id').val();
+            if (farmId) getFarmData();
+            else showNotification('No farm selected', 'info');
+        },
+        'user-list-section': function() { fetchUsers(currentUserPage); },
+        'create-user-section': function() {
+            // For create/edit user form, we want to reset the form
+            if (confirm('Refresh will clear all unsaved changes. Continue?')) {
+                const userId = $('#userId').val();
+                if (userId) {
+                    // If editing, reload the user data
+                    fetchUserDetails(userId);
+                } else {
+                    // If creating, reset the form
+                    resetUserForm();
+                }
+            }
+        }
+    };
+
+    const handler = refreshHandlers[activeSection];
+    if (handler) {
+        // Use Promise to ensure animation stops after refresh
+        Promise.resolve(handler()).then(() => {
+            showNotification('View refreshed');
+        }).catch(error => {
+            console.error('Refresh error:', error);
+        }).finally(() => {
+            icon.removeClass('refreshing');
+        });
+    } else {
+        showNotification('Refresh not available for this view', 'info');
+        icon.removeClass('refreshing');
+    }
+}
     </script>
 </body>
 </html>

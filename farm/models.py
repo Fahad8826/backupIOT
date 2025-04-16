@@ -38,20 +38,6 @@ class Motor(models.Model):
         if self.is_active and not self.valves.filter(is_active=True).exists():
             raise ValidationError("Motor cannot be turned on unless at least one valve is active.")
 
-    def save(self, *args, **kwargs):
-        self.clean()  # Ensure validation runs on save
-        super().save(*args, **kwargs)
-        current_valve_count = self.valves.count()
-        if current_valve_count < self.valve_count:
-            for i in range(current_valve_count, self.valve_count):
-                Valve.objects.create(
-                    motor=self,
-                    name=f"Valve {i + 1}"
-                )
-        elif current_valve_count > self.valve_count:
-            excess_valves = self.valves.order_by('id')[self.valve_count:]
-            for valve in excess_valves:
-                valve.delete()
 
     def __str__(self):
         return f"{self.motor_type} Motor - {self.farm.name}"
