@@ -1,11 +1,2240 @@
-{% load static %}
+<!--{% load static %}-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Farm & User Management Dashboard</title>-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">-->
+<!--    <link rel="stylesheet" href="{% static 'css/styles.css' %}">-->
+<!--</head>-->
+<!--<body>-->
+<!--    <div id="drawer" class="drawer">-->
+<!--        <div class="drawer-header">-->
+<!--            <h2>Management Dashboard</h2>-->
+<!--            <span class="drawer-close" onclick="toggleDrawer()">-->
+<!--                <i class="fas fa-times"></i>-->
+<!--            </span>-->
+<!--        </div>-->
+
+<!--        <div class="drawer-links">-->
+<!--            <div class="drawer-category">General</div>-->
+<!--            <button id="dashboard-btn" class="nav-btn"><i class="fas fa-tachometer-alt"></i> Dashboard</button>-->
+
+<!--            <div class="drawer-category">Farm Management</div>-->
+<!--            <button id="create-farm-btn" class="nav-btn"><i class="fas fa-plus"></i> Create Farm</button>-->
+<!--            <button id="farm-list-btn" class="nav-btn"><i class="fas fa-list"></i> Farm List</button>-->
+<!--            <button id="farm-details-btn" class="nav-btn"><i class="fas fa-info-circle"></i> Farm Details</button>-->
+
+<!--            <div class="drawer-category">User Management</div>-->
+<!--            <button id="user-list-btn" class="nav-btn"><i class="fas fa-users"></i> User List</button>-->
+<!--            <button id="create-user-btn" class="nav-btn"><i class="fas fa-user-plus"></i> Create User</button>-->
+
+<!--            <div class="drawer-category">System</div>-->
+<!--            <button class="nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div class="header">-->
+<!--        <div class="header-left">-->
+<!--            <button class="menu-btn" onclick="toggleDrawer()">-->
+<!--                <i class="fas fa-bars"></i>-->
+<!--            </button>-->
+<!--            <h1>Management Dashboard</h1>-->
+<!--        </div>-->
+<!--        <div class="header-right">-->
+<!--            <button class="header-btn btn btn-primary" onclick="logout()">-->
+<!--                <i class="fas fa-sign-out-alt"></i> Logout-->
+<!--            </button>-->
+<!--            <button class="header-btn px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md transition duration-200 ease-in-out flex items-center gap-2"-->
+<!--            onclick="refreshCurrentView()">-->
+<!--            <i class="fas fa-sync-alt"></i> Refresh-->
+<!--            </button>-->
+
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div id="content" class="content">-->
+<!--        &lt;!&ndash; Dashboard Section &ndash;&gt;-->
+<!--        <div id="dashboard-section" class="section active">-->
+<!--            <h2 class="mb-6">Dashboard Overview</h2>-->
+<!--            <div class="dashboard-grid">-->
+<!--                <div class="dashboard-card stats-card">-->
+<!--                    <div class="stats-header">-->
+<!--                        <span class="stats-title">Total Farms</span>-->
+<!--                        <span class="stats-icon blue-icon"><i class="fas fa-tractor"></i></span>-->
+<!--                    </div>-->
+<!--                    <div class="stats-value" id="total-farms">0</div>-->
+<!--                </div>-->
+<!--                <div class="dashboard-card stats-card">-->
+<!--                    <div class="stats-header">-->
+<!--                        <span class="stats-title">Total Motors</span>-->
+<!--                        <span class="stats-icon green-icon"><i class="fas fa-cogs"></i></span>-->
+<!--                    </div>-->
+<!--                    <div class="stats-value" id="total-motors">0</div>-->
+<!--                </div>-->
+<!--                <div class="dashboard-card stats-card">-->
+<!--                    <div class="stats-header">-->
+<!--                        <span class="stats-title">Total Valves</span>-->
+<!--                        <span class="stats-icon orange-icon"><i class="fas fa-tint"></i></span>-->
+<!--                    </div>-->
+<!--                    <div class="stats-value" id="total-valves">0</div>-->
+<!--                </div>-->
+<!--                <div class="dashboard-card stats-card">-->
+<!--                    <div class="stats-header">-->
+<!--                        <span class="stats-title">Total Users</span>-->
+<!--                        <span class="stats-icon blue-icon"><i class="fas fa-users"></i></span>-->
+<!--                    </div>-->
+<!--                    <div class="stats-value" id="total-users">0</div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash; Recent Farms Section &ndash;&gt;-->
+<!--            <div id="recent-farms" class="mt-8">-->
+<!--                <h3 class="text-lg font-semibold mb-4">Recent Farms</h3>-->
+<!--                <div id="recent-farms-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">-->
+<!--                    &lt;!&ndash; Recent farms will be populated here by JavaScript &ndash;&gt;-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Create Farm Section &ndash;&gt;-->
+<!--        <div id="create-farm-section" class="section">-->
+<!--            <h2>Create/Edit Farm</h2>-->
+<!--            <div class="form-container">-->
+<!--                <input type="hidden" id="farm-edit-id">-->
+<!--                <div class="form-grid">-->
+<!--                    <input type="text" id="farm-name" placeholder="Farm Name">-->
+<!--                    <input type="text" id="farm-location" placeholder="Location">-->
+<!--                    <select id="farm-owner">-->
+<!--                        <option value="">Select Owner</option>-->
+<!--                    </select>-->
+<!--                </div>-->
+<!--                <div id="owner-error" class="text-danger"></div>-->
+<!--                <div id="motors-container" class="mt-4">-->
+<!--                    <h3>Motors</h3>-->
+<!--                    <div id="motor-inputs"></div>-->
+<!--                    <div class="btn-group mt-3">-->
+<!--                        <button type="button" onclick="addMotorInput()" class="btn btn-primary">Add Motor</button>-->
+<!--                        <button onclick="saveFarm()" class="btn btn-primary">Save Farm</button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Farm List Section &ndash;&gt;-->
+<!--        <div id="farm-list-section" class="section">-->
+<!--            <h2>Farm List</h2>-->
+<!--            <div class="table-container">-->
+<!--                <div class="table-actions">-->
+<!--                    <button id="refreshFarmBtn" class="btn btn-primary mb-4">Refresh Farm List</button>-->
+<!--                    <input type="text" id="farmSearch" class="search-input" placeholder="Search farms...">-->
+<!--                </div>-->
+<!--                <table class="table">-->
+<!--                    <thead>-->
+<!--                        <tr>-->
+<!--                            <th>ID</th>-->
+<!--                            <th>Farm Name</th>-->
+<!--                            <th>Location</th>-->
+<!--                            <th>OwnerID</th>-->
+<!--                            <th>Motors</th>-->
+<!--                            <th>Actions</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody id="farmTable"></tbody>-->
+<!--                </table>-->
+<!--                <div id="farm-loading" class="text-center">-->
+<!--                    <i class="fas fa-spinner fa-spin"></i> Loading...-->
+<!--                </div>-->
+<!--                <div class="pagination">-->
+<!--                    <button id="farmPrevBtn" class="btn btn-primary" disabled>Previous</button>-->
+<!--                    <span id="farmPageInfo" class="page-info"></span>-->
+<!--                    <button id="farmNextBtn" class="btn btn-primary" disabled>Next</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Farm Details Section &ndash;&gt;-->
+<!--        <div id="farm-details-section" class="section">-->
+<!--            <h2>Farm Details</h2>-->
+<!--            <div class="form-container">-->
+<!--                <div class="flex gap-4 mb-4">-->
+<!--                    <input type="number" id="farm-id" placeholder="Farm ID" class="flex-1">-->
+<!--                    <button onclick="getFarmData()" class="btn btn-primary">Get Farm Data</button>-->
+<!--                </div>-->
+<!--                <div id="farm-data"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; User List Section &ndash;&gt;-->
+<!--        <div id="user-list-section" class="section">-->
+<!--            <h2>User List</h2>-->
+<!--            <div class="table-container">-->
+<!--                <div class="table-actions">-->
+<!--                    <button id="addUserBtn" class="btn btn-primary mb-4">Add New User</button>-->
+<!--                    <input type="text" id="userSearch" class="search-input" placeholder="Search users...">-->
+<!--                </div>-->
+<!--                <table class="table">-->
+<!--                    <thead>-->
+<!--                        <tr>-->
+<!--                            <th>ID</th>-->
+<!--                            <th>Username</th>-->
+<!--                            <th>Email</th>-->
+<!--                            <th>First Name</th>-->
+<!--                            <th>Last Name</th>-->
+<!--                            <th>Role</th>-->
+<!--                            <th>Active</th>-->
+<!--                            <th>Actions</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody id="userTable"></tbody>-->
+<!--                </table>-->
+<!--                <div id="user-loading" class="text-center">-->
+<!--                    <i class="fas fa-spinner fa-spin"></i> Loading...-->
+<!--                </div>-->
+<!--                <div class="pagination">-->
+<!--                    <button id="userPrevBtn" class="btn btn-primary" disabled>Previous</button>-->
+<!--                    <span id="userPageInfo" class="page-info"></span>-->
+<!--                    <button id="userNextBtn" class="btn btn-primary" disabled>Next</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Create/Edit User Section &ndash;&gt;-->
+<!--        <div id="create-user-section" class="section">-->
+<!--            <h2 id="userFormTitle">Create New User</h2>-->
+<!--            <div class="form-container">-->
+<!--                <form id="userForm">-->
+<!--                    <input type="hidden" id="userId">-->
+<!--                    <div class="form-grid">-->
+<!--                        <div>-->
+<!--                            <label for="username">Username</label>-->
+<!--                            <input type="text" id="username" required>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="email">Email</label>-->
+<!--                            <input type="email" id="email" required>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="firstName">First Name</label>-->
+<!--                            <input type="text" id="firstName">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="lastName">Last Name</label>-->
+<!--                            <input type="text" id="lastName">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="role">Role</label>-->
+<!--                            <select id="role">-->
+<!--                                <option value="admin">Admin</option>-->
+<!--                                <option value="user">User</option>-->
+<!--                                <option value="guest">Guest</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="isActive">Active</label>-->
+<!--                            <input type="checkbox" id="isActive" checked>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="phoneNumber">Phone Number</label>-->
+<!--                            <input type="tel" id="phoneNumber">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="address">Address</label>-->
+<!--                            <input type="text" id="address">-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="password">Password</label>-->
+<!--                            <input type="password" id="password">-->
+<!--                            <small id="passwordHint" class="hidden">Leave blank to keep current password</small>-->
+<!--                        </div>-->
+<!--                        <div>-->
+<!--                            <label for="confirmPassword">Confirm Password</label>-->
+<!--                            <input type="password" id="confirmPassword">-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="btn-group mt-4">-->
+<!--                        <button type="button" onclick="showSection('user-list')" class="btn btn-danger">Cancel</button>-->
+<!--                        <button type="button" id="saveUserBtn" class="btn btn-primary">Save</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Notification &ndash;&gt;-->
+<!--    <div id="notification" class="notification"></div>-->
+
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script>-->
+
+<!--const API_BASE_URL = 'http://127.0.0.1:8000/farm/';-->
+<!--const USER_API_URL = 'http://127.0.0.1:8000/users/';-->
+
+
+
+<!--const ITEMS_PER_PAGE = 7;-->
+
+
+<!--$(document).ready(function() {-->
+<!--    const token = localStorage.getItem('adminToken');-->
+<!--    if (!token) {-->
+<!--        window.location.href = '/';-->
+<!--        return;-->
+<!--    }-->
+
+<!--    $.ajaxSetup({-->
+<!--        headers: {-->
+<!--            'Authorization': 'Token ' + token-->
+<!--        }-->
+<!--    });-->
+
+<!--    loadOwners();-->
+<!--    addMotorInput();-->
+<!--    loadDashboardData();-->
+<!--    fetchUsers(1);-->
+
+<!--    // Farm List events-->
+<!--    $('#refreshFarmBtn').click(() => fetchFarms(1));-->
+<!--    $('#farmSearch').on('input', debounce(() => fetchFarms(1), 300));-->
+<!--    $('#farmPrevBtn').click(() => fetchFarms(currentFarmPage - 1));-->
+<!--    $('#farmNextBtn').click(() => fetchFarms(currentFarmPage + 1));-->
+
+<!--    // User List events-->
+<!--    $('#addUserBtn').click(() => {-->
+<!--        resetUserForm();-->
+<!--        showSection('create-user');-->
+<!--    });-->
+<!--    $('#userSearch').on('input', debounce(() => fetchUsers(1), 300));-->
+<!--    $('#userPrevBtn').click(() => fetchUsers(currentUserPage - 1));-->
+<!--    $('#userNextBtn').click(() => fetchUsers(currentUserPage + 1));-->
+
+<!--    $('#phoneNumber').on('blur', function() {-->
+<!--        const phoneNumber = $(this).val().trim();-->
+<!--        checkPhoneNumber(phoneNumber, currentUserId);-->
+<!--    });-->
+
+<!--    // Initialize active section-->
+<!--    showSection('dashboard');-->
+<!--});-->
+
+<!--// Debounce function to prevent excessive API calls during search-->
+<!--function debounce(func, wait) {-->
+<!--    let timeout;-->
+<!--    return function(...args) {-->
+<!--        clearTimeout(timeout);-->
+<!--        timeout = setTimeout(() => func.apply(this, args), wait);-->
+<!--    };-->
+<!--}-->
+
+<!--function toggleDrawer() {-->
+<!--    const drawer = document.getElementById('drawer');-->
+<!--    const content = document.getElementById('content');-->
+<!--    drawer.classList.toggle('open');-->
+<!--    content.classList.toggle('shifted');-->
+<!--}-->
+
+<!--function logout() {-->
+<!--    localStorage.removeItem('adminToken');-->
+<!--    window.location.replace('/');-->
+<!--}-->
+
+<!--function showSection(sectionId) {-->
+<!--    $('.section').removeClass('active');-->
+<!--    $('.nav-btn').removeClass('active');-->
+<!--    $(`#${sectionId}-section`).addClass('active');-->
+<!--    $(`#${sectionId}-btn`).addClass('active');-->
+
+<!--    switch(sectionId) {-->
+<!--        case 'farm-list':-->
+<!--            fetchFarms(1);-->
+<!--            break;-->
+<!--        case 'dashboard':-->
+<!--            loadDashboardData();-->
+<!--            break;-->
+<!--        case 'user-list':-->
+<!--            fetchUsers(1);-->
+<!--            break;-->
+<!--    }-->
+<!--}-->
+
+<!--$('.nav-btn').click(function() {-->
+<!--    const section = this.id.replace('-btn', '');-->
+<!--    showSection(section);-->
+<!--});-->
+
+<!--function showNotification(message, type = 'success') {-->
+<!--    const notification = $('#notification');-->
+<!--    notification.text(message).removeClass('success error').addClass(type).show();-->
+<!--    setTimeout(() => notification.hide(), 3000);-->
+<!--}-->
+
+<!--function getCsrfToken() {-->
+<!--    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1];-->
+<!--    return cookieValue;-->
+<!--}-->
+
+<!--// Farm Management Functions-->
+<!--function loadOwners() {-->
+<!--    $.ajax({-->
+<!--        url: USER_API_URL,-->
+<!--        method: 'GET',-->
+<!--        success: function(users) {-->
+<!--            const ownerSelect = $('#farm-owner');-->
+<!--            ownerSelect.empty().append('<option value="">Select Owner</option>');-->
+
+<!--            // Check if users is an array or has a results property (paginated)-->
+<!--            let userList = Array.isArray(users) ? users : (users.results || []);-->
+
+<!--            if (!userList || userList.length === 0) {-->
+<!--                $('#owner-error').text('No users found');-->
+<!--                return;-->
+<!--            }-->
+
+<!--            userList.forEach(user => {-->
+<!--                ownerSelect.append(`<option value="${user.id}">${user.email} (${user.role || 'user'})</option>`);-->
+<!--            });-->
+
+<!--            $('#owner-error').text('');-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            $('#owner-error').text(`Failed to load owners: ${xhr.statusText}`);-->
+<!--            console.error('Error loading owners:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--let motorCount = 0;-->
+
+<!--function addMotorInput(motor = null) {-->
+<!--    motorCount++;-->
+<!--    const motorId = motor?.id || '';-->
+<!--    const valveCountValue = motor?.valve_count || '';-->
+<!--    const valves = motor?.valves || [];-->
+
+<!--    let valveInputs = '';-->
+<!--    if (motor && valves.length > 0) {-->
+<!--        // Populate existing valves-->
+<!--        valves.forEach((valve, index) => {-->
+<!--            valveInputs += `-->
+<!--                <div class="valve-input flex gap-4 mb-2 items-center" id="valve-${motorCount}-${index + 1}">-->
+<!--                    <input type="text" id="valve-name-${motorCount}-${index + 1}"-->
+<!--                           placeholder="Valve Name" value="${valve.name || ''}" class="flex-1">-->
+<!--                    <input type="number" id="valve-id-${motorCount}-${index + 1}"-->
+<!--                           placeholder="Valve ID" value="${valve.valve_id || ''}" class="flex-1"-->
+<!--                           onblur="checkValveId(${motorCount}, ${index + 1}, '${valve.id || ''}')">-->
+<!--                    <button type="button" onclick="$(this).closest('.valve-input').remove()" class="btn-danger">Remove Valve</button>-->
+<!--                </div>-->
+<!--            `;-->
+<!--        });-->
+<!--    }-->
+
+<!--    const motorHtml = `-->
+<!--        <div class="motor-input border p-4 mb-6 rounded bg-gray-100" id="motor-${motorCount}">-->
+<!--            &lt;!&ndash; Motor Fields &ndash;&gt;-->
+<!--            <div class="motor-fields flex flex-wrap gap-4 items-center">-->
+<!--                <input type="number" id="UIN-${motorCount}" value="${motor?.UIN || ''}"-->
+<!--                       placeholder="UIN" class="flex-1 min-w-[150px]" onblur="checkUIN(${motorCount}, '${motorId}')">-->
+<!--                <input type="hidden" id="motor-id-${motorCount}" value="${motorId}">-->
+<!--                <select id="motor-type-${motorCount}" class="flex-1 min-w-[150px]" onchange="handleMotorTypeChange(${motorCount})">-->
+<!--                    <option value="single_phase" ${motor?.motor_type === 'single_phase' ? 'selected' : ''}>Single Phase</option>-->
+<!--                    <option value="double_phase" ${motor?.motor_type === 'double_phase' ? 'selected' : ''}>Double Phase</option>-->
+<!--                    <option value="triple_phase" ${motor?.motor_type === 'triple_phase' ? 'selected' : ''}>Triple Phase</option>-->
+<!--                </select>-->
+<!--                <input type="number" id="valve-count-${motorCount}"-->
+<!--                       placeholder="Valve Count" min="1" value="${valveCountValue}" class="flex-1 min-w-[150px]"-->
+<!--                       onchange="updateValveInputs(${motorCount})">-->
+<!--                <button type="button" onclick="$(this).closest('.motor-input').remove()" class="btn-danger">Remove Motor</button>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Valve Inputs Section &ndash;&gt;-->
+<!--            <div id="valve-inputs-${motorCount}" class="valve-inputs mt-4 ml-4">-->
+<!--                ${valveInputs}-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    `;-->
+
+<!--    $('#motor-inputs').append(motorHtml);-->
+<!--    handleMotorTypeChange(motorCount);-->
+
+<!--    // If no valves were provided, initialize based on valve_count-->
+<!--    if (!motor || valves.length === 0) {-->
+<!--        updateValveInputs(motorCount);-->
+<!--    }-->
+<!--}-->
+
+
+<!--function handleMotorTypeChange(motorIndex) {-->
+<!--    const type = $(`#motor-type-${motorIndex}`).val();-->
+<!--    const valveCountInput = $(`#valve-count-${motorIndex}`);-->
+<!--    let maxValves = 8; // default-->
+
+<!--    if (type === 'single_phase') {-->
+<!--        maxValves = 3;-->
+<!--    } else if (type === 'double_phase') {-->
+<!--        maxValves = 6;-->
+<!--    } else if (type === 'triple_phase') {-->
+<!--        maxValves = 8;-->
+<!--    }-->
+
+<!--    valveCountInput.attr('max', maxValves);-->
+
+<!--    // Optional: Enforce the current value to not exceed max-->
+<!--    if (parseInt(valveCountInput.val()) > maxValves) {-->
+<!--        valveCountInput.val(maxValves);-->
+<!--        updateValveInputs(motorIndex); // Optional: re-render valves-->
+<!--    }-->
+<!--}-->
+
+
+<!--function updateValveInputs(motorIndex) {-->
+<!--    const valveCountInput = $(`#valve-count-${motorIndex}`);-->
+<!--    let valveCount = parseInt(valveCountInput.val()) || 0;-->
+<!--    const valveInputsContainer = $(`#valve-inputs-${motorIndex}`);-->
+
+<!--    // Clear existing valve inputs-->
+<!--    valveInputsContainer.empty();-->
+
+<!--    // Generate new valve inputs based on valve_count-->
+<!--    for (let i = 1; i <= valveCount; i++) {-->
+<!--        const valveHtml = `-->
+<!--            <div class="valve-input flex gap-4 mb-2" id="valve-${motorIndex}-${i}">-->
+<!--                <input type="text" id="valve-name-${motorIndex}-${i}"-->
+<!--                       placeholder="Valve Name" class="flex-1">-->
+<!--                <input type="number" id="valve-id-${motorIndex}-${i}"-->
+<!--                       placeholder="Valve ID" class="flex-1"-->
+<!--                       onblur="checkValveId(${motorIndex}, ${i})">-->
+<!--                <button type="button" onclick="$(this).closest('.valve-input').remove()"-->
+<!--                        class="btn-danger">Remove Valve</button>-->
+<!--            </div>-->
+<!--        `;-->
+<!--        valveInputsContainer.append(valveHtml);-->
+<!--    }-->
+<!--}-->
+
+<!--function checkUIN(count, currentMotorId) {-->
+<!--    const uinInput = $(`#UIN-${count}`);-->
+<!--    const uinValue = uinInput.val();-->
+<!--    if (!uinValue) return;-->
+
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}motors/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(motors) {-->
+<!--            // Handle potential paginated response-->
+<!--            const motorList = Array.isArray(motors) ? motors : (motors.results || []);-->
+
+<!--            const existingMotor = motorList.find(motor => motor.UIN == uinValue && motor.id != currentMotorId);-->
+<!--            if (existingMotor) {-->
+<!--                showNotification(`UIN ${uinValue} is already taken by Motor ID: ${existingMotor.id}`, 'error');-->
+<!--                uinInput.val('');-->
+<!--            }-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification(`Error checking UIN: ${xhr.statusText}`, 'error');-->
+<!--            console.error('Error checking UIN:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function saveFarm() {-->
+<!--    const farmId = $('#farm-edit-id').val();-->
+<!--    const motors = [];-->
+<!--    let hasError = false;-->
+
+<!--    $('.motor-input').each(function() {-->
+<!--        const motorId = $(this).find('[id^="motor-id-"]').val();-->
+<!--        const motorUIN = $(this).find('[id^="UIN-"]').val();-->
+<!--        const motorType = $(this).find('[id^="motor-type-"]').val();-->
+<!--        const valveCount = parseInt($(this).find('[id^="valve-count-"]').val()) || 0;-->
+<!--        const motorIndex = $(this).attr('id').split('-')[1];-->
+
+<!--        if (valveCount < 1) {-->
+<!--            showNotification('Valve count must be at least 1', 'error');-->
+<!--            hasError = true;-->
+<!--            return false;-->
+<!--        }-->
+
+<!--        // Collect valve data-->
+<!--        const valves = [];-->
+<!--        for (let i = 1; i <= valveCount; i++) {-->
+<!--            const valveNameInput = $(`#valve-name-${motorIndex}-${i}`);-->
+<!--            const valveIdInput = $(`#valve-id-${motorIndex}-${i}`);-->
+<!--            if (valveNameInput.length && valveIdInput.length) {-->
+<!--                const valveName = valveNameInput.val().trim();-->
+<!--                const valveId = valveIdInput.val().trim();-->
+<!--                if (!valveName || !valveId) {-->
+<!--                    showNotification(`Please provide both name and ID for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');-->
+<!--                    hasError = true;-->
+<!--                    return false;-->
+<!--                }-->
+<!--                // Check for validation error-->
+<!--                if ($(`#valve-id-error-${motorIndex}-${i}`).length) {-->
+<!--                    showNotification(`Please resolve Valve ID error for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');-->
+<!--                    hasError = true;-->
+<!--                    return false;-->
+<!--                }-->
+<!--                valves.push({-->
+<!--                    name: valveName,-->
+<!--                    valve_id: parseInt(valveId),-->
+<!--                    is_active: false // Default to inactive; adjust as needed-->
+<!--                });-->
+<!--            }-->
+<!--        }-->
+
+<!--        if (valves.length !== valveCount) {-->
+<!--            showNotification(`Number of valves provided does not match valve count for motor ${motorUIN || 'UIN not set'}`, 'error');-->
+<!--            hasError = true;-->
+<!--            return false;-->
+<!--        }-->
+
+<!--        const motorObject = {-->
+<!--            motor_type: motorType,-->
+<!--            valve_count: valveCount,-->
+<!--            UIN: motorUIN || null,-->
+<!--            valves: valves-->
+<!--        };-->
+<!--        if (motorId) motorObject.id = motorId;-->
+<!--        motors.push(motorObject);-->
+<!--    });-->
+
+<!--    if (hasError || motors.length === 0) {-->
+<!--        if (!hasError) showNotification('Please add at least one motor', 'error');-->
+<!--        return;-->
+<!--    }-->
+
+<!--    const farmData = {-->
+<!--        name: $('#farm-name').val().trim() || 'Unnamed Farm',-->
+<!--        location: $('#farm-location').val().trim() || 'Unknown Location',-->
+<!--        owner: parseInt($('#farm-owner').val()) || null,-->
+<!--        motors: motors-->
+<!--    };-->
+
+<!--    $.ajax({-->
+<!--        url: farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`,-->
+<!--        method: farmId ? 'PUT' : 'POST',-->
+<!--        contentType: 'application/json',-->
+<!--        data: JSON.stringify(farmData),-->
+<!--        success: function(response) {-->
+<!--            showNotification(`Farm ${farmId ? 'updated' : 'created'} successfully`);-->
+<!--            resetFarmForm();-->
+<!--            showSection('farm-list');-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            const error = xhr.responseJSON || {};-->
+<!--            let message = 'Error saving farm: ';-->
+<!--            if (error.motors) {-->
+<!--                message += error.motors.map((m, i) => {-->
+<!--                    if (m.valves) {-->
+<!--                        return `Motor ${i+1}: ${m.valves.map((v, vi) => `Valve ${vi+1}: ${v.name?.[0] || v.valve_id?.[0] || 'Invalid data'}`).join('; ')}`;-->
+<!--                    }-->
+<!--                    return `Motor ${i+1}: ${m.UIN?.[0] || 'Invalid data'}`;-->
+<!--                }).join('; ');-->
+<!--            } else {-->
+<!--                message += error.detail || xhr.statusText;-->
+<!--            }-->
+<!--            showNotification(message, 'error');-->
+<!--            console.error('Error saving farm:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function resetFarmForm() {-->
+<!--    $('#farm-edit-id').val('');-->
+<!--    $('#farm-name, #farm-location').val('');-->
+<!--    $('#farm-owner').val('');-->
+<!--    $('#motor-inputs').empty();-->
+<!--    motorCount = 0;-->
+<!--    addMotorInput();-->
+<!--}-->
+
+<!--let currentFarmPage = 1;-->
+<!--let totalFarmPages = 1;-->
+
+<!--function fetchFarms(page) {-->
+<!--    currentFarmPage = page < 1 ? 1 : page;-->
+<!--    const searchQuery = $('#farmSearch').val().trim();-->
+<!--    $("#farm-loading").show();-->
+<!--    $("#farmTable").empty();-->
+
+<!--    // Construct URL with query parameters for search and pagination-->
+<!--    let url = `${API_BASE_URL}farms/`;-->
+<!--    const queryParams = new URLSearchParams();-->
+
+<!--    if (searchQuery) {-->
+<!--        queryParams.append('search', searchQuery);-->
+<!--    }-->
+
+<!--    queryParams.append('page', currentFarmPage);-->
+<!--    queryParams.append('limit', ITEMS_PER_PAGE);-->
+
+<!--    if (queryParams.toString()) {-->
+<!--        url += `?${queryParams.toString()}`;-->
+<!--    }-->
+
+<!--    $.ajax({-->
+<!--        url: url,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            $("#farm-loading").hide();-->
+<!--            let farms = [];-->
+
+<!--            // Handle paginated response-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                farms = response.results;-->
+<!--                totalFarmPages = Math.ceil(response.count / ITEMS_PER_PAGE);-->
+<!--            }-->
+<!--            // Handle array response-->
+<!--            else if (Array.isArray(response)) {-->
+<!--                // For search filtering when backend doesn't support it-->
+<!--                if (searchQuery) {-->
+<!--                    response = response.filter(farm =>-->
+<!--                        farm.name.toLowerCase().includes(searchQuery.toLowerCase()) ||-->
+<!--                        farm.location.toLowerCase().includes(searchQuery.toLowerCase())-->
+<!--                    );-->
+<!--                }-->
+
+<!--                const totalItems = response.length;-->
+<!--                totalFarmPages = Math.ceil(totalItems / ITEMS_PER_PAGE);-->
+
+<!--                // Apply manual pagination-->
+<!--                const startIndex = (currentFarmPage - 1) * ITEMS_PER_PAGE;-->
+<!--                const endIndex = startIndex + ITEMS_PER_PAGE;-->
+<!--                farms = response.slice(startIndex, endIndex);-->
+<!--            }-->
+<!--            // Handle unexpected response-->
+<!--            else {-->
+<!--                console.error("Unexpected response format:", response);-->
+<!--                showNotification("Received unexpected data format from server", "error");-->
+<!--                farms = [];-->
+<!--                totalFarmPages = 1;-->
+<!--            }-->
+
+<!--            if (farms.length === 0) {-->
+<!--                $("#farmTable").html("<tr><td colspan='6' class='text-center'>No farms found</td></tr>");-->
+<!--            } else {-->
+<!--                farms.forEach(farm => {-->
+<!--                    $("#farmTable").append(`-->
+<!--                        <tr>-->
+<!--                            <td>${farm.id || 'N/A'}</td>-->
+<!--                            <td>${farm.name || 'Unnamed'}</td>-->
+<!--                            <td>${farm.location || 'Unknown'}</td>-->
+<!--                            <td>${farm.owner_name || farm.owner || 'Not assigned'}</td>-->
+<!--                            <td>${farm.motors ? farm.motors.length : 0}</td>-->
+<!--                            <td>-->
+<!--                                <button onclick="editFarm(${farm.id})" class="btn-primary">Edit</button>-->
+<!--                                <button onclick="deleteFarm(${farm.id})" class="btn-danger">Delete</button>-->
+<!--                                <button onclick="viewFarmDetails(${farm.id})" class="btn-primary">View</button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    `);-->
+<!--                });-->
+<!--            }-->
+
+<!--            // Update pagination controls-->
+<!--            updateFarmPagination();-->
+<!--        },-->
+<!--        error: function(xhr, status, error) {-->
+<!--            $("#farm-loading").hide();-->
+<!--            $("#farmTable").html(`<tr><td colspan='6' class='text-danger text-center'>Error: ${xhr.statusText || 'Failed to load farms'}</td></tr>`);-->
+<!--            console.error('Fetch farms error:', xhr, status, error);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function updateFarmPagination() {-->
+<!--    $('#farmPageInfo').text(`Page ${currentFarmPage} of ${totalFarmPages}`);-->
+<!--    $('#farmPrevBtn').prop('disabled', currentFarmPage <= 1);-->
+<!--    $('#farmNextBtn').prop('disabled', currentFarmPage >= totalFarmPages);-->
+<!--}-->
+
+<!--function editFarm(farmId) {-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}farms/${farmId}/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(farm) {-->
+<!--            $('#farm-edit-id').val(farm.id);-->
+<!--            $('#farm-name').val(farm.name);-->
+<!--            $('#farm-location').val(farm.location);-->
+<!--            $('#farm-owner').val(farm.owner);-->
+<!--            $('#motor-inputs').empty();-->
+<!--            motorCount = 0;-->
+
+<!--            // Check if motors is array or undefined-->
+<!--            const motors = farm.motors || [];-->
+<!--            if (motors.length > 0) {-->
+<!--                motors.forEach(motor => addMotorInput(motor));-->
+<!--            } else {-->
+<!--                addMotorInput(); // Add one empty motor input-->
+<!--            }-->
+
+<!--            showSection('create-farm');-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading farm: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading farm:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function deleteFarm(farmId) {-->
+<!--    if (confirm('Are you sure you want to delete this farm?')) {-->
+<!--        $.ajax({-->
+<!--            url: `${API_BASE_URL}farms/${farmId}/`,-->
+<!--            method: 'DELETE',-->
+<!--            success: function() {-->
+<!--                showNotification('Farm deleted');-->
+<!--                fetchFarms(currentFarmPage);-->
+<!--                loadDashboardData(); // Refresh dashboard counts-->
+<!--            },-->
+<!--            error: function(xhr) {-->
+<!--                showNotification('Error deleting farm: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--                console.error('Error deleting farm:', xhr);-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+<!--}-->
+
+<!--function viewFarmDetails(farmId) {-->
+<!--    $('#farm-id').val(farmId);-->
+<!--    getFarmData();-->
+<!--    showSection('farm-details');-->
+<!--}-->
+
+<!--function getFarmData() {-->
+<!--    const farmId = $('#farm-id').val();-->
+<!--    if (!farmId) {-->
+<!--        $('#farm-data').html('<p class="text-danger">Please enter a Farm ID</p>');-->
+<!--        return;-->
+<!--    }-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}farms/${farmId}/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(data) {-->
+<!--            displayFarmData(data);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            $('#farm-data').html(`<p class="text-danger">Error: ${xhr.responseJSON?.detail || xhr.statusText}</p>`);-->
+<!--            console.error('Error fetching farm data:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function loadDashboardData() {-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}farms/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            let farms = [];-->
+
+<!--            // Handle both paginated and array responses-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                farms = response.results;-->
+<!--                $('#total-farms').text(response.count || 0);-->
+<!--            } else if (Array.isArray(response)) {-->
+<!--                farms = response;-->
+<!--                $('#total-farms').text(farms.length);-->
+<!--            } else {-->
+<!--                $('#total-farms').text(0);-->
+<!--                return;-->
+<!--            }-->
+
+<!--            let totalMotors = 0;-->
+<!--            let totalValves = 0;-->
+
+<!--            farms.forEach(farm => {-->
+<!--                if (farm.motors && Array.isArray(farm.motors)) {-->
+<!--                    totalMotors += farm.motors.length;-->
+
+<!--                    farm.motors.forEach(motor => {-->
+<!--                        if (motor.valves && Array.isArray(motor.valves)) {-->
+<!--                            totalValves += motor.valves.length;-->
+<!--                        } else if (motor.valve_count) {-->
+<!--                            totalValves += motor.valve_count;-->
+<!--                        }-->
+<!--                    });-->
+<!--                }-->
+<!--            });-->
+
+<!--            $('#total-motors').text(totalMotors);-->
+<!--            $('#total-valves').text(totalValves);-->
+
+<!--            // Display recent farms (e.g., the first 3 farms)-->
+<!--            displayRecentFarms(farms.slice(0, 3));-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading farm data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading dashboard data:', xhr);-->
+<!--            $('#total-farms').text('Error');-->
+<!--            $('#total-motors').text('Error');-->
+<!--            $('#total-valves').text('Error');-->
+<!--            $('#recent-farms').html('<p class="text-danger">Error loading recent farms</p>');-->
+<!--        }-->
+<!--    });-->
+
+<!--    $.ajax({-->
+<!--        url: USER_API_URL,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            // Handle both paginated and array responses-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                $('#total-users').text(response.count || 0);-->
+<!--            } else if (Array.isArray(response)) {-->
+<!--                $('#total-users').text(response.length);-->
+<!--            } else {-->
+<!--                $('#total-users').text(0);-->
+<!--            }-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading user data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading user data:', xhr);-->
+<!--            $('#total-users').text('Error');-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function displayRecentFarms(farms) {-->
+<!--    const recentFarmsContainer = $('#recent-farms-container');-->
+<!--    recentFarmsContainer.empty();-->
+
+<!--    if (!farms || farms.length === 0) {-->
+<!--        recentFarmsContainer.html('<p class="text-center text-gray-500">No farms available</p>');-->
+<!--        return;-->
+<!--    }-->
+
+<!--    farms.forEach(farm => {-->
+<!--        const motorCount = farm.motors ? farm.motors.length : 0;-->
+<!--        const valveCount = farm.motors ? farm.motors.reduce((sum, motor) => sum + (motor.valve_count || 0), 0) : 0;-->
+
+<!--        recentFarmsContainer.append(`-->
+<!--            <div class="bg-white p-4 rounded-lg shadow">-->
+<!--                <h4 class="font-medium text-gray-800">${farm.name || 'Unnamed Farm'}</h4>-->
+<!--                <p class="text-sm text-gray-600">Location: ${farm.location || 'Unknown'}</p>-->
+<!--                <p class="text-sm text-gray-600">Owner: ${farm.owner_name || farm.owner || 'Not assigned'}</p>-->
+<!--                <p class="text-sm text-gray-600">Motors: ${motorCount}</p>-->
+<!--                <p class="text-sm text-gray-600">Valves: ${valveCount}</p>-->
+<!--            </div>-->
+<!--        `);-->
+<!--    });-->
+<!--}-->
+
+<!--function displayFarmData(data) {-->
+<!--    let html = `-->
+<!--        <h3 class="text-lg font-semibold mb-2">${data.name || 'Unnamed Farm'} - ${data.location || 'Unknown Location'}</h3>-->
+<!--        <p class="text-sm text-gray-600 mb-4">Owner: ${data.owner_name || data.owner || 'Not assigned'}</p>-->
+<!--        <h4 class="text-md font-semibold mt-4 mb-2">Motors and Valves:</h4>-->
+<!--    `;-->
+
+<!--    if (data.motors && Array.isArray(data.motors) && data.motors.length > 0) {-->
+<!--        data.motors.forEach(motor => {-->
+<!--            html += `-->
+<!--                <div class="p-4 bg-white rounded-lg shadow mt-4">-->
+<!--                    <h4 class="text-md font-medium text-gray-800 mb-2">-->
+<!--                        Motor ${motor.id} (${motor.motor_type || 'Unknown type'}) - ${motor.valve_count || 0} valves - -->
+<!--                        Status: <span class="${motor.is_active ? 'text-green-600' : 'text-red-600'}">${motor.is_active ? 'On' : 'Off'}</span>-->
+<!--                    </h4>-->
+<!--                    <div class="flex flex-wrap gap-3">-->
+<!--                        <button onclick="editMotor(${motor.id}, ${data.id})" class="btn-primary text-sm py-1 px-3 fixed-width-btn">Edit</button>-->
+<!--                        <button onclick="deleteMotor(${motor.id}, ${data.id})" class="btn-danger text-sm py-1 px-3 fixed-width-btn">Delete</button>-->
+<!--                        <button onclick="toggleMotor(${motor.id}, ${motor.is_active ? 1 : 0})"-->
+<!--                                class="toggle-motor-btn ${motor.is_active ? 'btn-active' : 'btn-inactive'} text-sm py-1 px-3 fixed-width-btn"-->
+<!--                                data-motor-id="${motor.id}">-->
+<!--                            ${motor.is_active ? 'Turn Off' : 'Turn On'}-->
+<!--                        </button>-->
+<!--                    </div>-->
+<!--            `;-->
+
+<!--            if (motor.valves && Array.isArray(motor.valves) && motor.valves.length > 0) {-->
+<!--                html += `<div class="mt-3">`;-->
+<!--                motor.valves.forEach(valve => {-->
+<!--                    html += `-->
+<!--                        <div class="flex items-center justify-between gap-3 mt-2 py-2 border-t border-gray-200">-->
+<!--                            <span class="text-sm text-gray-600 flex-1 truncate">-->
+<!--                                ${valve.name || `Valve ${valve.id}`} (Valve ID: ${valve.valve_id || 'N/A'}, ID: ${valve.id}) - -->
+<!--                                Status: <span class="${valve.is_active ? 'text-green-600' : 'text-red-600'}">${valve.is_active ? 'Active' : 'Inactive'}</span>-->
+<!--                            </span>-->
+<!--                            <button onclick="toggleValve(${valve.id}, ${valve.is_active ? 1 : 0})"-->
+<!--                                    class="toggle-valve-btn ${valve.is_active ? 'btn-active' : 'btn-inactive'} text-sm py-1 px-3 fixed-width-btn"-->
+<!--                                    data-valve-id="${valve.id}">-->
+<!--                                Toggle-->
+<!--                            </button>-->
+<!--                        </div>-->
+<!--                    `;-->
+<!--                });-->
+<!--                html += `</div>`;-->
+<!--            } else {-->
+<!--                html += `<p class="text-sm text-gray-600 mt-2">No valves assigned yet</p>`;-->
+<!--            }-->
+<!--            html += `</div>`;-->
+<!--        });-->
+<!--    } else {-->
+<!--        html += `<p class="text-sm text-gray-600">No motors assigned to this farm</p>`;-->
+<!--    }-->
+<!--    $('#farm-data').html(html);-->
+<!--}-->
+
+<!--function toggleMotor(motorId, currentStatus) {-->
+<!--    const newStatus = currentStatus ? 0 : 1;-->
+<!--    const $button = $(`.toggle-motor-btn[data-motor-id="${motorId}"]`);-->
+
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}motors/${motorId}/`,-->
+<!--        method: 'PATCH',-->
+<!--        contentType: 'application/json',-->
+<!--        data: JSON.stringify({ is_active: newStatus }),-->
+<!--        success: function() {-->
+<!--            showNotification(`Motor ${motorId} ${newStatus ? 'activated' : 'deactivated'} successfully`);-->
+<!--            // Update button text and class-->
+<!--            $button.text(newStatus ? 'Turn Off' : 'Turn On');-->
+<!--            $button.removeClass(newStatus ? 'btn-inactive' : 'btn-active');-->
+<!--            $button.addClass(newStatus ? 'btn-active' : 'btn-inactive');-->
+<!--            getFarmData(); // Refresh farm data-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error toggling motor: activate atleast 1 valve');-->
+<!--            console.error('Error toggling motor:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+
+<!--function toggleValve(valveId, currentStatus) {-->
+<!--    const newStatus = currentStatus ? 0 : 1;-->
+<!--    const $button = $(`.toggle-valve-btn[data-valve-id="${valveId}"]`);-->
+
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}valves/${valveId}/`,-->
+<!--        method: 'PATCH',-->
+<!--        contentType: 'application/json',-->
+<!--        data: JSON.stringify({-->
+<!--            is_active: newStatus-->
+<!--        }),-->
+<!--        success: function() {-->
+<!--            showNotification(`Valve ${valveId} ${newStatus ? 'activated' : 'deactivated'} successfully`);-->
+<!--            $button.removeClass(newStatus ? 'btn-inactive' : 'btn-active');-->
+<!--            $button.addClass(newStatus ? 'btn-active' : 'btn-inactive');-->
+<!--            getFarmData();-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error toggling valve: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error toggling valve:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+
+
+<!--function editMotor(motorId, farmId) {-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}motors/${motorId}/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(motor) {-->
+<!--            editFarm(farmId);-->
+<!--            setTimeout(() => {-->
+<!--                for (let i = 1; i <= motorCount; i++) {-->
+<!--                    if ($(`#motor-id-${i}`).val() == motorId) {-->
+<!--                        $(`#UIN-${i}`).val(motor.UIN);-->
+<!--                        $(`#motor-type-${i}`).val(motor.motor_type);-->
+<!--                        $(`#valve-count-${i}`).val(motor.valve_count);-->
+<!--                        updateValveInputs(i);-->
+<!--                        // Populate valve inputs-->
+<!--                        motor.valves.forEach((valve, index) => {-->
+<!--                            $(`#valve-name-${i}-${index + 1}`).val(valve.name);-->
+<!--                            $(`#valve-id-${i}-${index + 1}`).val(valve.valve_id);-->
+<!--                            // Trigger validation for existing valve_id-->
+<!--                            checkValveId(i, index + 1, valve.id);-->
+<!--                        });-->
+<!--                        break;-->
+<!--                    }-->
+<!--                }-->
+<!--            }, 300);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading motor:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function deleteMotor(motorId, farmId) {-->
+<!--    if (confirm('Are you sure you want to delete this motor?')) {-->
+<!--        $.ajax({-->
+<!--            url: `${API_BASE_URL}motors/${motorId}/`,-->
+<!--            method: 'DELETE',-->
+<!--            success: function() {-->
+<!--                showNotification('Motor deleted successfully');-->
+<!--                getFarmData(); // Refresh farm details-->
+<!--                if ($('#farm-edit-id').val() == farmId) {-->
+<!--                    editFarm(farmId); // Refresh farm edit form if open-->
+<!--                }-->
+<!--            },-->
+<!--            error: function(xhr) {-->
+<!--                showNotification('Error deleting motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--                console.error('Error deleting motor:', xhr);-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+<!--}-->
+
+<!--function loadDashboardData() {-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}farms/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            let farms = [];-->
+
+<!--            // Handle both paginated and array responses-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                farms = response.results;-->
+<!--                $('#total-farms').text(response.count || 0);-->
+<!--            } else if (Array.isArray(response)) {-->
+<!--                farms = response;-->
+<!--                $('#total-farms').text(farms.length);-->
+<!--            } else {-->
+<!--                $('#total-farms').text(0);-->
+<!--                return;-->
+<!--            }-->
+
+<!--            let totalMotors = 0;-->
+<!--            let totalValves = 0;-->
+
+<!--            farms.forEach(farm => {-->
+<!--                if (farm.motors && Array.isArray(farm.motors)) {-->
+<!--                    totalMotors += farm.motors.length;-->
+
+<!--                    farm.motors.forEach(motor => {-->
+<!--                        if (motor.valves && Array.isArray(motor.valves)) {-->
+<!--                            totalValves += motor.valves.length;-->
+<!--                        } else if (motor.valve_count) {-->
+<!--                            totalValves += motor.valve_count;-->
+<!--                        }-->
+<!--                    });-->
+<!--                }-->
+<!--            });-->
+
+<!--            $('#total-motors').text(totalMotors);-->
+<!--            $('#total-valves').text(totalValves);-->
+
+<!--            // Display recent farms (e.g., the first 3 farms)-->
+<!--            displayRecentFarms(farms.slice(0, 3));-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading farm data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading dashboard data:', xhr);-->
+<!--            $('#total-farms').text('Error');-->
+<!--            $('#total-motors').text('Error');-->
+<!--            $('#total-valves').text('Error');-->
+<!--            $('#recent-farms').html('<p class="text-danger">Error loading recent farms</p>');-->
+<!--        }-->
+<!--    });-->
+
+<!--    $.ajax({-->
+<!--        url: USER_API_URL,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            // Handle both paginated and array responses-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                $('#total-users').text(response.count || 0);-->
+<!--            } else if (Array.isArray(response)) {-->
+<!--                $('#total-users').text(response.length);-->
+<!--            } else {-->
+<!--                $('#total-users').text(0);-->
+<!--            }-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading user data: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading user data:', xhr);-->
+<!--            $('#total-users').text('Error');-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--// User Management Functions-->
+<!--let currentUserPage = 1;-->
+<!--let totalUserPages = 1;-->
+
+<!--function fetchUsers(page) {-->
+<!--    currentUserPage = page < 1 ? 1 : page;-->
+<!--    const searchQuery = $('#userSearch').val().trim();-->
+<!--    $('#user-loading').show();-->
+<!--    $('#userTable').empty();-->
+
+<!--    // Construct URL with query parameters-->
+<!--    let url = USER_API_URL;-->
+<!--    const queryParams = new URLSearchParams();-->
+
+<!--    if (searchQuery) {-->
+<!--        queryParams.append('search', searchQuery);-->
+<!--    }-->
+
+<!--    queryParams.append('page', currentUserPage);-->
+<!--    queryParams.append('limit', ITEMS_PER_PAGE);-->
+
+<!--    if (queryParams.toString()) {-->
+<!--        url += `?${queryParams.toString()}`;-->
+<!--    }-->
+
+<!--    $.ajax({-->
+<!--        url: url,-->
+<!--        type: 'GET',-->
+<!--        success: function(response) {-->
+<!--            $('#user-loading').hide();-->
+<!--            let users = [];-->
+
+<!--            // Handle paginated response-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                users = response.results;-->
+<!--                totalUserPages = Math.ceil(response.count / ITEMS_PER_PAGE);-->
+<!--            }-->
+<!--            // Handle array response-->
+<!--            else if (Array.isArray(response)) {-->
+<!--                // For search filtering when backend doesn't support it-->
+<!--                if (searchQuery) {-->
+<!--                    response = response.filter(user =>-->
+<!--                        (user.username && user.username.toLowerCase().includes(searchQuery.toLowerCase())) ||-->
+<!--                        (user.email && user.email.toLowerCase().includes(searchQuery.toLowerCase())) ||-->
+<!--                        (user.first_name && user.first_name.toLowerCase().includes(searchQuery.toLowerCase())) ||-->
+<!--                        (user.last_name && user.last_name.toLowerCase().includes(searchQuery.toLowerCase()))-->
+<!--                    );-->
+<!--                }-->
+
+<!--                const totalItems = response.length;-->
+<!--                totalUserPages = Math.ceil(totalItems / ITEMS_PER_PAGE);-->
+
+<!--                // Apply manual pagination-->
+<!--                const startIndex = (currentUserPage - 1) * ITEMS_PER_PAGE;-->
+<!--                const endIndex = startIndex + ITEMS_PER_PAGE;-->
+<!--                users = response.slice(startIndex, endIndex);-->
+<!--            }-->
+<!--            // Handle unexpected response-->
+<!--            else {-->
+<!--                console.error("Unexpected response format:", response);-->
+<!--                showNotification("Received unexpected data format from server", "error");-->
+<!--                users = [];-->
+<!--                totalUserPages = 1;-->
+<!--            }-->
+
+<!--            if (!users || users.length === 0) {-->
+<!--                $('#userTable').html("<tr><td colspan='8' class='text-center'>No users found</td></tr>");-->
+<!--            } else {-->
+<!--                users.forEach(user => {-->
+<!--                    $('#userTable').append(`-->
+<!--                        <tr>-->
+<!--                            <td>${user.id}</td>-->
+<!--                            <td>${user.username || 'N/A'}</td>-->
+<!--                            <td>${user.email || 'N/A'}</td>-->
+<!--                            <td>${user.first_name || ''}</td>-->
+<!--                            <td>${user.last_name || ''}</td>-->
+<!--                            <td>${user.role || 'user'}</td>-->
+<!--                            <td>${user.is_active ? 'Active' : 'Inactive'}</td>-->
+<!--                            <td>-->
+<!--                                <button onclick="fetchUserDetails(${user.id})" class="btn-primary">Edit</button>-->
+<!--                                <button onclick="showDeleteConfirmation(${user.id})" class="btn-danger">Delete</button>-->
+<!--                            </td>-->
+<!--                        </tr>-->
+<!--                    `);-->
+<!--                });-->
+<!--            }-->
+<!--            updateUserPagination();-->
+<!--        },-->
+<!--        error: function(xhr, status, error) {-->
+<!--            $('#user-loading').hide();-->
+<!--            $('#userTable').html(`<tr><td colspan='8' class='text-danger text-center'>Error: ${xhr.statusText || 'Failed to load users'}</td></tr>`);-->
+<!--            console.error('Fetch users error:', xhr, status, error);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function updateUserPagination() {-->
+<!--    $('#userPageInfo').text(`Page ${currentUserPage} of ${totalUserPages}`);-->
+<!--    $('#userPrevBtn').prop('disabled', currentUserPage <= 1);-->
+<!--    $('#userNextBtn').prop('disabled', currentUserPage >= totalUserPages);-->
+<!--}-->
+
+<!--function fetchUserDetails(userId) {-->
+<!--    $.ajax({-->
+<!--        url: `${USER_API_URL}${userId}/`,-->
+<!--        type: 'GET',-->
+<!--        success: function(user) {-->
+<!--            populateUserForm(user);-->
+<!--            currentUserId = user.id;-->
+<!--            $('#userFormTitle').text('Edit User');-->
+<!--            $('#passwordHint').removeClass('hidden');-->
+<!--            showSection('create-user');-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Failed to load user details: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading user details:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function populateUserForm(user) {-->
+<!--    $('#userId').val(user.id);-->
+<!--    $('#username').val(user.username);-->
+<!--    $('#email').val(user.email);-->
+<!--    $('#firstName').val(user.first_name || '');-->
+<!--    $('#lastName').val(user.last_name || '');-->
+<!--    $('#role').val(user.role || 'user');-->
+<!--    $('#isActive').prop('checked', user.is_active);-->
+<!--    $('#phoneNumber').val(user.phone_number || '');-->
+<!--    $('#phoneNumber').removeClass('error-input');-->
+<!--    $('#phone-error').hide();-->
+<!--    $('#address').val(user.address || '');-->
+<!--    $('#password').val('');-->
+<!--    $('#confirmPassword').val('');-->
+<!--}-->
+
+<!--function showDeleteConfirmation(userId) {-->
+<!--    if (confirm('Are you sure you want to delete this user?')) {-->
+<!--        deleteUser(userId);-->
+<!--    }-->
+<!--}-->
+
+<!--function createUser(userData) {-->
+<!--    $.ajax({-->
+<!--        url: USER_API_URL,-->
+<!--        type: 'POST',-->
+<!--        contentType: 'application/json',-->
+<!--        data: JSON.stringify(userData),-->
+<!--        headers: { 'X-CSRFToken': getCsrfToken() },-->
+<!--        success: function() {-->
+<!--            showNotification('User created successfully');-->
+<!--            resetUserForm();-->
+<!--            showSection('user-list');-->
+<!--            fetchUsers(currentUserPage);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Failed to create user: ' + xhr.statusText, 'error');-->
+<!--            console.error('Error creating user:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function updateUser(userId, userData) {-->
+<!--    $.ajax({-->
+<!--        url: `${USER_API_URL}${userId}/`,-->
+<!--        type: 'PUT',-->
+<!--        contentType: 'application/json',-->
+<!--        data: JSON.stringify(userData),-->
+<!--        headers: { 'X-CSRFToken': getCsrfToken() },-->
+<!--        success: function() {-->
+<!--            showNotification('User updated successfully');-->
+<!--            resetUserForm();-->
+<!--            showSection('user-list');-->
+<!--            fetchUsers(currentUserPage);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Failed to update user: ' + xhr.statusText, 'error');-->
+<!--            console.error('Error updating user:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function deleteUser(userId) {-->
+<!--    $.ajax({-->
+<!--        url: `${USER_API_URL}${userId}/`,-->
+<!--        type: 'DELETE',-->
+<!--        headers: { 'X-CSRFToken': getCsrfToken() },-->
+<!--        success: function() {-->
+<!--            showNotification('User deleted successfully');-->
+<!--            fetchUsers(currentUserPage);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Failed to delete user: ' + xhr.statusText, 'error');-->
+<!--            console.error('Error deleting user:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--// Add this function to check if phone number exists-->
+<!--function checkPhoneNumber(phoneNumber, currentUserId = null) {-->
+<!--    if (!phoneNumber) return; // Don't validate empty phone numbers-->
+
+<!--    $.ajax({-->
+<!--        url: USER_API_URL,-->
+<!--        method: 'GET',-->
+<!--        success: function(response) {-->
+<!--            // Handle both paginated and array responses-->
+<!--            let users = [];-->
+<!--            if (response && response.results !== undefined) {-->
+<!--                users = response.results;-->
+<!--            } else if (Array.isArray(response)) {-->
+<!--                users = response;-->
+<!--            }-->
+
+<!--            // Check if phone number exists for another user-->
+<!--            const existingUser = users.find(user =>-->
+<!--                user.phone_number === phoneNumber &&-->
+<!--                user.id != currentUserId // Exclude current user when editing-->
+<!--            );-->
+
+<!--            if (existingUser) {-->
+<!--                showNotification(`Phone number ${phoneNumber} is already taken by another user`, 'error');-->
+<!--                $('#phoneNumber').addClass('error-input');-->
+<!--                // Create or show error message element-->
+<!--                if ($('#phone-error').length === 0) {-->
+<!--                    $('#phoneNumber').after('<div id="phone-error" class="text-danger">Phone number already taken</div>');-->
+<!--                } else {-->
+<!--                    $('#phone-error').show();-->
+<!--                }-->
+<!--            } else {-->
+<!--                $('#phoneNumber').removeClass('error-input');-->
+<!--                $('#phone-error').hide();-->
+<!--            }-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            console.error('Error checking phone number:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function gatherUserFormData() {-->
+<!--    const password = $('#password').val();-->
+<!--    const confirmPassword = $('#confirmPassword').val();-->
+
+<!--    if (password && password !== confirmPassword) {-->
+<!--        showNotification('Passwords do not match', 'error');-->
+<!--        return null;-->
+<!--    }-->
+
+<!--    if ($('#phone-error').is(':visible')) {-->
+<!--        showNotification('Please fix the phone number issue before saving', 'error');-->
+<!--        return null;-->
+<!--    }-->
+
+<!--    const userData = {-->
+<!--        username: $('#username').val().trim(),-->
+<!--        email: $('#email').val().trim(),-->
+<!--        first_name: $('#firstName').val().trim(),-->
+<!--        last_name: $('#lastName').val().trim(),-->
+<!--        role: $('#role').val(),-->
+<!--        is_active: $('#isActive').is(':checked'),-->
+<!--        phone_number: $('#phoneNumber').val().trim(),-->
+<!--        address: $('#address').val().trim()-->
+<!--    };-->
+
+<!--    if (password) userData.password = password;-->
+<!--    return userData;-->
+<!--}-->
+
+<!--function resetUserForm() {-->
+<!--    $('#userForm')[0].reset();-->
+<!--    $('#userId').val('');-->
+<!--    currentUserId = null;-->
+<!--    $('#userFormTitle').text('Create New User');-->
+<!--    $('#passwordHint').addClass('hidden');-->
+<!--    $('#phoneNumber').removeClass('error-input');-->
+<!--    $('#phone-error').hide();-->
+<!--}-->
+
+<!--let currentUserId = null;-->
+
+<!--$('#saveUserBtn').click(function() {-->
+<!--    const userData = gatherUserFormData();-->
+<!--    if (!userData) return;-->
+
+<!--    if (currentUserId) {-->
+<!--        updateUser(currentUserId, userData);-->
+<!--    } else {-->
+<!--        createUser(userData);-->
+<!--    }-->
+<!--});-->
+
+<!--function checkValveId(motorIndex, valveIndex, currentValveId = '') {-->
+<!--    const valveIdInput = $(`#valve-id-${motorIndex}-${valveIndex}`);-->
+<!--    const valveIdValue = valveIdInput.val().trim();-->
+<!--    if (!valveIdValue) return;-->
+
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}valves/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(valves) {-->
+<!--            // Handle potential paginated response-->
+<!--            const valveList = Array.isArray(valves) ? valves : (valves.results || []);-->
+
+<!--            const existingValve = valveList.find(valve => valve.valve_id == valveIdValue && valve.id != currentValveId);-->
+<!--            if (existingValve) {-->
+<!--                showNotification(`Valve ID ${valveIdValue} is already taken by Valve ID: ${existingValve.id}`, 'error');-->
+<!--                valveIdInput.val('');-->
+<!--                valveIdInput.addClass('error-input');-->
+<!--                valveIdInput.after(`<div id="valve-id-error-${motorIndex}-${valveIndex}" class="text-danger">Valve ID already taken</div>`);-->
+<!--            } else {-->
+<!--                valveIdInput.removeClass('error-input');-->
+<!--                $(`#valve-id-error-${motorIndex}-${valveIndex}`).remove();-->
+<!--            }-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification(`Error checking Valve ID: ${xhr.statusText}`, 'error');-->
+<!--            console.error('Error checking Valve ID:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+<!--function refreshCurrentView() {-->
+<!--    const refreshBtn = $('button[onclick="refreshCurrentView()"]');-->
+<!--    const icon = refreshBtn.find('i');-->
+
+<!--    // Add spinning animation-->
+<!--    icon.addClass('refreshing');-->
+
+<!--    const activeSection = $('.section.active').attr('id');-->
+
+<!--    if (!activeSection) {-->
+<!--        showNotification('No active section to refresh', 'error');-->
+<!--        icon.removeClass('refreshing');-->
+<!--        return;-->
+<!--    }-->
+
+<!--    // Map section IDs to their refresh functions-->
+<!--    const refreshHandlers = {-->
+<!--        'dashboard-section': loadDashboardData,-->
+<!--        'create-farm-section': function() {-->
+<!--            // For create/edit farm form, we want to reset the form-->
+<!--            if (confirm('Refresh will clear all unsaved changes. Continue?')) {-->
+<!--                const farmId = $('#farm-edit-id').val();-->
+<!--                if (farmId) {-->
+<!--                    // If editing, reload the farm data-->
+<!--                    editFarm(farmId);-->
+<!--                } else {-->
+<!--                    // If creating, reset the form-->
+<!--                    resetFarmForm();-->
+<!--                }-->
+<!--            }-->
+<!--        },-->
+<!--        'farm-list-section': function() { fetchFarms(currentFarmPage); },-->
+<!--        'farm-details-section': function() {-->
+<!--            const farmId = $('#farm-id').val();-->
+<!--            if (farmId) getFarmData();-->
+<!--            else showNotification('No farm selected', 'info');-->
+<!--        },-->
+<!--        'user-list-section': function() { fetchUsers(currentUserPage); },-->
+<!--        'create-user-section': function() {-->
+<!--            // For create/edit user form, we want to reset the form-->
+<!--            if (confirm('Refresh will clear all unsaved changes. Continue?')) {-->
+<!--                const userId = $('#userId').val();-->
+<!--                if (userId) {-->
+<!--                    // If editing, reload the user data-->
+<!--                    fetchUserDetails(userId);-->
+<!--                } else {-->
+<!--                    // If creating, reset the form-->
+<!--                    resetUserForm();-->
+<!--                }-->
+<!--            }-->
+<!--        }-->
+<!--    };-->
+
+<!--    const handler = refreshHandlers[activeSection];-->
+<!--    if (handler) {-->
+<!--        // Use Promise to ensure animation stops after refresh-->
+<!--        Promise.resolve(handler()).then(() => {-->
+<!--            showNotification('View refreshed');-->
+<!--        }).catch(error => {-->
+<!--            console.error('Refresh error:', error);-->
+<!--        }).finally(() => {-->
+<!--            icon.removeClass('refreshing');-->
+<!--        });-->
+<!--    } else {-->
+<!--        showNotification('Refresh not available for this view', 'info');-->
+<!--        icon.removeClass('refreshing');-->
+<!--    }-->
+<!--}-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farm & User Management Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+   <style>
+  :root {
+    --primary: #3498db;
+    --primary-dark: #2980b9;
+    --secondary: #2c3e50;
+    --secondary-light: #34495e;
+    --bg-light: #f4f4f9;
+    --text-light: #ecf0f1;
+    --text-dark: #2c3e50;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* Drawer Styles */
+.drawer {
+    height: 100%;
+    width: 280px;
+    position: fixed;
+    top: 0;
+    left: -280px;
+    background-color: var(--secondary);
+    overflow-x: hidden;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    box-shadow: var(--shadow);
+}
+
+.drawer.open {
+    left: 0;
+}
+
+.drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: var(--primary);
+}
+
+.drawer-header h2 {
+    color: var(--text-light);
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.drawer-close {
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.drawer-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.drawer-user {
+    padding: 15px 20px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    color: var(--text-light);
+}
+
+.drawer-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.drawer-links {
+    padding: 10px 0;
+}
+
+.drawer-category {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    padding: 15px 20px 5px;
+}
+
+.drawer button.nav-btn {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--text-light);
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+    cursor: pointer;
+}
+
+.drawer button.nav-btn:hover, .drawer button.nav-btn.active {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left-color: var(--primary);
+}
+
+.drawer button.nav-btn i {
+    width: 24px;
+    margin-right: 15px;
+    text-align: center;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 70px;
+    background-color: #fff;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-dark);
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 15px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.menu-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.header h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-btn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.header-btn i {
+    font-size: 1rem;
+}
+
+.content {
+    margin-left: 0;
+    padding: 20px;
+    transition: margin-left 0.3s ease;
+}
+
+.content.shifted {
+    margin-left: 280px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.dashboard-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+}
+
+.stats-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.stats-title {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.stats-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.stats-value {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.blue-icon {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.green-icon {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+
+.orange-icon {
+    background-color: rgba(230, 126, 34, 0.1);
+    color: #e67e22;
+}
+
+/* Section Styles */
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-container input, .form-container select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+
+.form-container input:focus, .form-container select:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.form-container button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--text-light);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: var(--text-light);
+}
+
+.btn-danger:hover {
+    background-color: #c0392b;
+}
+
+.table-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+.table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    color: var(--text-light);
+    display: none;
+    z-index: 2000;
+    box-shadow: var(--shadow);
+}
+
+.notification.success {
+    background-color: #2ecc71;
+}
+
+.notification.error {
+    background-color: #e74c3c;
+}
+
+.table-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.search-input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 200px;
+    max-width: 100%;
+}
+
+#farm-loading, #user-loading {
+    display: none;
+    text-align: center;
+    padding: 15px;
+    color: var(--text-dark);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-danger {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+.hidden {
+    display: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.page-info {
+    font-size: 1rem;
+    color: var(--text-dark);
+}
+
+/* Grid Utilities */
+.grid {
+    display: grid;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.md\:grid-cols-2 {
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.lg\:grid-cols-3 {
+    @media (min-width: 1024px) {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.gap-4 {
+    gap: 1rem;
+}
+
+.shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.rounded-lg {
+    border-radius: 0.5rem;
+}
+
+.p-4 {
+    padding: 1rem;
+}
+
+.bg-white {
+    background-color: #fff;
+}
+
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.text-gray-600 {
+    color: #4b5563;
+}
+
+.text-gray-800 {
+    color: #1f2937;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.mt-8 {
+    margin-top: 2rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mb-6 {
+    margin-bottom: 1.5rem;
+}
+
+/* Toggle Buttons */
+.toggle-motor-btn, .toggle-valve-btn {
+    padding: 0.25rem 0.75rem;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+}
+
+.toggle-motor-btn.btn-active, .toggle-valve-btn.btn-active {
+    background-color: var(--primary);
+    color: var(--text-light);
+}
+
+.toggle-motor-btn.btn-inactive, .toggle-valve-btn.btn-inactive {
+    background-color: var(--secondary);
+    color: var(--text-light);
+}
+
+.toggle-motor-btn:hover, .toggle-valve-btn:hover {
+    background-color: var(--primary-dark);
+}
+
+.toggle-motor-btn.btn-inactive:hover, .toggle-valve-btn.btn-inactive:hover {
+    background-color: var(--secondary-light);
+}
+
+/* Flex Utilities */
+.flex {
+    display: flex;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.justify-between {
+    justify-content: space-between;
+}
+
+.gap-3 {
+    gap: 0.75rem;
+}
+
+/* Additional Spacing and Borders */
+.border-t {
+    border-top: 1px solid;
+}
+
+.border-gray-200 {
+    border-color: #e5e7eb;
+}
+
+.text-md {
+    font-size: 1rem;
+}
+
+.text-green-600 {
+    color: #16a34a;
+}
+
+.text-red-600 {
+    color: #dc2626;
+}
+
+.mt-3 {
+    margin-top: 0.75rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+/* Motor and Valve Input Styles */
+.motor-input {
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    background-color: #fff;
+}
+
+.valve-inputs {
+    margin-top: 10px;
+    padding-left: 20px;
+    border-left: 2px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.valve-input {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.valve-input input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    flex: 1;
+}
+
+.valve-input input:focus {
+    border-color: var(--primary);
+    outline: none;
+}
+
+.valve-input .btn-danger {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    white-space: nowrap;
+}
+
+/* Error Input Styles */
+.error-input {
+    border: 1px solid #e74c3c !important;
+    background-color: rgba(231, 76, 60, 0.05);
+}
+
+.text-danger {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .valve-input {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .valve-input input {
+        width: 100%;
+    }
+
+    .valve-input .btn-danger {
+        width: fit-content;
+        align-self: flex-end;
+        margin-top: 5px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .motor-input {
+        margin-bottom: 10px;
+    }
+}
+
+@media (min-width: 769px) {
+    .form-container .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+   </style>
 </head>
 <body>
     <div id="drawer" class="drawer">
@@ -44,11 +2273,10 @@
         <div class="header-right">
             <button class="header-btn btn btn-primary" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
             <button class="header-btn px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white shadow-md transition duration-200 ease-in-out flex items-center gap-2"
-            onclick="refreshCurrentView()">
-            <i class="fas fa-sync-alt"></i> Refresh
-            </button>
+        onclick="refreshCurrentView()">
+    <i class="fas fa-sync-alt"></i>
+</button>
 
         </div>
     </div>
@@ -266,10 +2494,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
+
+
+
 const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
 const USER_API_URL = 'http://127.0.0.1:8000/users/';
 const ITEMS_PER_PAGE = 7;
-
 
 $(document).ready(function() {
     const token = localStorage.getItem('adminToken');
@@ -409,8 +2639,12 @@ function addMotorInput(motor = null) {
 
     let valveInputs = '';
     if (motor && valves.length > 0) {
+        // Debug log
+        console.log(`Adding ${valves.length} valves for motor ${motorId}`);
+
         // Populate existing valves
         valves.forEach((valve, index) => {
+            console.log(`Valve ${index}:`, valve);
             valveInputs += `
                 <div class="valve-input flex gap-4 mb-2 items-center" id="valve-${motorCount}-${index + 1}">
                     <input type="text" id="valve-name-${motorCount}-${index + 1}"
@@ -418,6 +2652,7 @@ function addMotorInput(motor = null) {
                     <input type="number" id="valve-id-${motorCount}-${index + 1}"
                            placeholder="Valve ID" value="${valve.valve_id || ''}" class="flex-1"
                            onblur="checkValveId(${motorCount}, ${index + 1}, '${valve.id || ''}')">
+                    <input type="hidden" id="valve-db-id-${motorCount}-${index + 1}" value="${valve.id || ''}">
                     <button type="button" onclick="$(this).closest('.valve-input').remove()" class="btn-danger">Remove Valve</button>
                 </div>
             `;
@@ -499,6 +2734,7 @@ function updateValveInputs(motorIndex) {
                 <input type="number" id="valve-id-${motorIndex}-${i}"
                        placeholder="Valve ID" class="flex-1"
                        onblur="checkValveId(${motorIndex}, ${i})">
+                <input type="hidden" id="valve-db-id-${motorIndex}-${i}" value="">
                 <button type="button" onclick="$(this).closest('.valve-input').remove()"
                         class="btn-danger">Remove Valve</button>
             </div>
@@ -532,6 +2768,8 @@ function checkUIN(count, currentMotorId) {
     });
 }
 
+
+
 function saveFarm() {
     const farmId = $('#farm-edit-id').val();
     const motors = [];
@@ -552,44 +2790,52 @@ function saveFarm() {
 
         // Collect valve data
         const valves = [];
-        for (let i = 1; i <= valveCount; i++) {
-            const valveNameInput = $(`#valve-name-${motorIndex}-${i}`);
-            const valveIdInput = $(`#valve-id-${motorIndex}-${i}`);
-            if (valveNameInput.length && valveIdInput.length) {
-                const valveName = valveNameInput.val().trim();
-                const valveId = valveIdInput.val().trim();
-                if (!valveName || !valveId) {
-                    showNotification(`Please provide both name and ID for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');
-                    hasError = true;
-                    return false;
-                }
-                // Check for validation error
-                if ($(`#valve-id-error-${motorIndex}-${i}`).length) {
-                    showNotification(`Please resolve Valve ID error for valve ${i} in motor ${motorUIN || 'UIN not set'}`, 'error');
-                    hasError = true;
-                    return false;
-                }
-                valves.push({
-                    name: valveName,
-                    valve_id: parseInt(valveId),
-                    is_active: false // Default to inactive; adjust as needed
-                });
-            }
-        }
+        $(this).find('.valve-input').each(function() {
+            const valveIdx = $(this).attr('id').split('-')[2];
+            const valveName = $(`#valve-name-${motorIndex}-${valveIdx}`).val().trim();
+            const valveId = $(`#valve-id-${motorIndex}-${valveIdx}`).val().trim();
+            const valveDbId = $(`#valve-db-id-${motorIndex}-${valveIdx}`).val();
 
-        if (valves.length !== valveCount) {
-            showNotification(`Number of valves provided does not match valve count for motor ${motorUIN || 'UIN not set'}`, 'error');
-            hasError = true;
-            return false;
-        }
+            console.log(`Valve data: name=${valveName}, valve_id=${valveId}, id=${valveDbId}`);
+
+            if (!valveName || !valveId) {
+                showNotification(`Please provide both name and ID for valve ${valveIdx} in motor ${motorUIN || 'UIN not set'}`, 'error');
+                hasError = true;
+                return false;
+            }
+
+            // Check for validation error
+            if ($(`#valve-id-error-${motorIndex}-${valveIdx}`).length && $(`#valve-id-error-${motorIndex}-${valveIdx}`).is(':visible')) {
+                showNotification(`Please resolve Valve ID error for valve ${valveIdx} in motor ${motorUIN || 'UIN not set'}`, 'error');
+                hasError = true;
+                return false;
+            }
+
+            const valveObject = {
+                name: valveName,
+                valve_id: parseInt(valveId),
+                is_active: false // Default to inactive; adjust as needed
+            };
+
+            // Add the database ID if it exists
+            if (valveDbId && valveDbId !== '') {
+                valveObject.id = parseInt(valveDbId);
+                console.log(`Added valve ID ${valveDbId} to valve object`);
+            }
+
+            valves.push(valveObject);
+        });
+
+        if (hasError) return false;
 
         const motorObject = {
             motor_type: motorType,
-            valve_count: valveCount,
+            valve_count: valves.length, // Use actual count of valves
             UIN: motorUIN || null,
             valves: valves
         };
-        if (motorId) motorObject.id = motorId;
+
+        if (motorId) motorObject.id = parseInt(motorId);
         motors.push(motorObject);
     });
 
@@ -605,6 +2851,14 @@ function saveFarm() {
         motors: motors
     };
 
+    // Add farm ID if editing existing farm
+    if (farmId) {
+        farmData.id = parseInt(farmId);
+    }
+
+    // Log the data being sent for debugging
+    console.log('Sending farm data:', JSON.stringify(farmData, null, 2));
+
     $.ajax({
         url: farmId ? `${API_BASE_URL}farms/${farmId}/` : `${API_BASE_URL}farms/`,
         method: farmId ? 'PUT' : 'POST',
@@ -616,18 +2870,34 @@ function saveFarm() {
             showSection('farm-list');
         },
         error: function(xhr) {
+            console.error('Error status:', xhr.status);
+            console.error('Error response text:', xhr.responseText);
+
+            try {
+                const errorJson = JSON.parse(xhr.responseText);
+                console.error('Parsed error:', errorJson);
+            } catch (e) {
+                console.error('Could not parse error response as JSON');
+            }
+
             const error = xhr.responseJSON || {};
             let message = 'Error saving farm: ';
-            if (error.motors) {
-                message += error.motors.map((m, i) => {
-                    if (m.valves) {
-                        return `Motor ${i+1}: ${m.valves.map((v, vi) => `Valve ${vi+1}: ${v.name?.[0] || v.valve_id?.[0] || 'Invalid data'}`).join('; ')}`;
-                    }
-                    return `Motor ${i+1}: ${m.UIN?.[0] || 'Invalid data'}`;
-                }).join('; ');
+
+            if (typeof error === 'object') {
+                if (error.motors) {
+                    message += error.motors.map((m, i) => {
+                        if (m.valves) {
+                            return `Motor ${i+1}: ${m.valves.map((v, vi) => `Valve ${vi+1}: ${v.name?.[0] || v.valve_id?.[0] || JSON.stringify(v)}`).join('; ')}`;
+                        }
+                        return `Motor ${i+1}: ${m.UIN?.[0] || JSON.stringify(m)}`;
+                    }).join('; ');
+                } else {
+                    message += JSON.stringify(error);
+                }
             } else {
-                message += error.detail || xhr.statusText;
+                message += error.detail || xhr.statusText || xhr.responseText || 'Unknown error';
             }
+
             showNotification(message, 'error');
             console.error('Error saving farm:', xhr);
         }
@@ -767,6 +3037,44 @@ function editFarm(farmId) {
         },
         error: function(xhr) {
             showNotification('Error loading farm: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
+            console.error('Error loading farm:', xhr);
+        }
+    });
+}
+
+
+function editFarm(farmId) {
+    $.ajax({
+        url: `${API_BASE_URL}farms/${farmId}/`,
+        method: 'GET',
+        success: function(farm) {
+            $('#farm-edit-id').val(farm.id);
+            $('#farm-name').val(farm.name);
+            $('#farm-location').val(farm.location);
+            $('#farm-owner').val(farm.owner);
+            $('#motor-inputs').empty();
+            motorCount = 0;
+
+            // Check if motors is array or undefined
+            const motors = farm.motors || [];
+            if (motors.length > 0) {
+                // Create a clear log to debug
+                console.log("Farm data from server:", farm);
+                motors.forEach(motor => {
+                    console.log("Motor data:", motor);
+                    if (motor.valves) {
+                        console.log("Motor valves:", motor.valves);
+                    }
+                    addMotorInput(motor);
+                });
+            } else {
+                addMotorInput(); // Add one empty motor input
+            }
+
+            showSection('create-farm');
+        },
+        error: function(xhr) {
+          showNotification('Error loading farm: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');
             console.error('Error loading farm:', xhr);
         }
     });
@@ -1018,7 +3326,6 @@ function toggleValve(valveId, currentStatus) {
 }
 
 
-
 function editMotor(motorId, farmId) {
     $.ajax({
         url: `${API_BASE_URL}motors/${motorId}/`,
@@ -1036,6 +3343,8 @@ function editMotor(motorId, farmId) {
                         motor.valves.forEach((valve, index) => {
                             $(`#valve-name-${i}-${index + 1}`).val(valve.name);
                             $(`#valve-id-${i}-${index + 1}`).val(valve.valve_id);
+                            // Add the database ID for each valve
+                            $(`#valve-db-id-${i}-${index + 1}`).val(valve.id);
                             // Trigger validation for existing valve_id
                             checkValveId(i, index + 1, valve.id);
                         });
@@ -1050,6 +3359,7 @@ function editMotor(motorId, farmId) {
         }
     });
 }
+
 
 function deleteMotor(motorId, farmId) {
     if (confirm('Are you sure you want to delete this motor?')) {
@@ -1152,6 +3462,8 @@ function fetchUsers(page) {
     currentUserPage = page < 1 ? 1 : page;
     const searchQuery = $('#userSearch').val().trim();
     $('#user-loading').show();
+
+    // Clear the table completely before adding new data
     $('#userTable').empty();
 
     // Construct URL with query parameters
@@ -1208,6 +3520,9 @@ function fetchUsers(page) {
                 users = [];
                 totalUserPages = 1;
             }
+
+            // Make sure the table is empty before adding rows
+            $('#userTable').empty();
 
             if (!users || users.length === 0) {
                 $('#userTable').html("<tr><td colspan='8' class='text-center'>No users found</td></tr>");
@@ -1297,7 +3612,11 @@ function createUser(userData) {
             showNotification('User created successfully');
             resetUserForm();
             showSection('user-list');
-            fetchUsers(currentUserPage);
+
+            // Add a small delay before fetching users
+            setTimeout(function() {
+                fetchUsers(currentUserPage);
+            }, 100);
         },
         error: function(xhr) {
             showNotification('Failed to create user: ' + xhr.statusText, 'error');
@@ -1317,7 +3636,11 @@ function updateUser(userId, userData) {
             showNotification('User updated successfully');
             resetUserForm();
             showSection('user-list');
-            fetchUsers(currentUserPage);
+
+            // Add a small delay before fetching users to ensure proper refresh
+            setTimeout(function() {
+                fetchUsers(currentUserPage);
+            }, 100);
         },
         error: function(xhr) {
             showNotification('Failed to update user: ' + xhr.statusText, 'error');
@@ -1438,8 +3761,12 @@ $('#saveUserBtn').click(function() {
 
 function checkValveId(motorIndex, valveIndex, currentValveId = '') {
     const valveIdInput = $(`#valve-id-${motorIndex}-${valveIndex}`);
-    const valveIdValue = valveIdInput.val().trim();
-    if (!valveIdValue) return;
+    const valveIdValue = valveIdInput.val();
+
+    // Remove any existing error message
+    $(`#valve-id-error-${motorIndex}-${valveIndex}`).remove();
+
+    if (!valveIdValue) return; // Don't check empty values
 
     $.ajax({
         url: `${API_BASE_URL}valves/`,
@@ -1448,15 +3775,23 @@ function checkValveId(motorIndex, valveIndex, currentValveId = '') {
             // Handle potential paginated response
             const valveList = Array.isArray(valves) ? valves : (valves.results || []);
 
-            const existingValve = valveList.find(valve => valve.valve_id == valveIdValue && valve.id != currentValveId);
+            // Check if this valve_id already exists (excluding the current valve being edited)
+            const existingValve = valveList.find(valve =>
+                valve.valve_id == valveIdValue &&
+                valve.id != currentValveId
+            );
+
             if (existingValve) {
-                showNotification(`Valve ID ${valveIdValue} is already taken by Valve ID: ${existingValve.id}`, 'error');
+                // Show error message
+                valveIdInput.after(`
+                    <div id="valve-id-error-${motorIndex}-${valveIndex}" class="text-red-500 text-sm mt-1">
+                        Valve ID ${valveIdValue} is already taken
+                    </div>
+                `);
+                // Clear the valve ID input
                 valveIdInput.val('');
-                valveIdInput.addClass('error-input');
-                valveIdInput.after(`<div id="valve-id-error-${motorIndex}-${valveIndex}" class="text-danger">Valve ID already taken</div>`);
-            } else {
-                valveIdInput.removeClass('error-input');
-                $(`#valve-id-error-${motorIndex}-${valveIndex}`).remove();
+
+                showNotification(`Valve ID ${valveIdValue} is already taken by Valve ID: ${existingValve.id}`, 'error');
             }
         },
         error: function(xhr) {

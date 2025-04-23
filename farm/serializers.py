@@ -1,4 +1,5 @@
 
+
 from rest_framework import serializers
 from .models import Farm, Motor, Valve
 from accounts.models import User
@@ -6,6 +7,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 
 
 class ValveSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)  # Make ID optional but pass it when present
+
     class Meta:
         model = Valve
         fields = ['id', 'name', 'is_active','valve_id']
@@ -61,8 +64,27 @@ class ValveSerializer(serializers.ModelSerializer):
                 'detail': f'Error processing valve data: {str(e)}'
             })
 
+    def update(self, instance, validated_data):
+        """Update existing valve"""
+        try:
+            # Update valve attributes
+            for attr, value in validated_data.items():
+                if attr != 'id':  # Skip the ID field
+                    setattr(instance, attr, value)
+            instance.save()
+            return instance
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({
+                'detail': str(e)
+            })
+        except Exception as e:
+            raise serializers.ValidationError({
+                'detail': f'Error updating valve: {str(e)}'
+            })
+
 
 class MotorSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)  # Make ID optional but pass it when present
     valves = ValveSerializer(many=True, required=False)
 
     class Meta:
@@ -167,6 +189,7 @@ class MotorSerializer(serializers.ModelSerializer):
             motor = Motor.objects.create(**validated_data)
 
             for valve_data in valves_data:
+                valve_id = valve_data.pop('id', None)  # Remove id if present for creation
                 Valve.objects.create(motor=motor, **valve_data)
 
             if check_valves and motor.is_active and not motor.valves.filter(is_active=True).exists():
@@ -189,27 +212,79 @@ class MotorSerializer(serializers.ModelSerializer):
             })
 
     def update(self, instance, validated_data):
-        """Update existing motor"""
         try:
             valves_data = validated_data.pop('valves', None)
 
+            # Update motor attributes
             for attr, value in validated_data.items():
-                setattr(instance, attr, value)
+                if attr != 'id':  # Skip the ID field
+                    setattr(instance, attr, value)
             instance.save()
 
+            # Handle valves update if provided
             if valves_data is not None:
+                # Create a dictionary of existing valves by ID
                 existing_valves = {valve.id: valve for valve in instance.valves.all()}
+                # Also track by valve_id for better matching
+                existing_valves_by_valve_id = {valve.valve_id: valve for valve in instance.valves.all() if valve.valve_id}
+
+                processed_valve_ids = []
+
+                # Debug: Print existing valves
+                print(f"DEBUG: Motor {instance.id} existing valves: {existing_valves}")
+
+                # Process each valve in the update data
                 for valve_data in valves_data:
                     valve_id = valve_data.get('id')
+                    valve_external_id = valve_data.get('valve_id')
+
+                    # Debug: Print valve data being processed
+                    print(f"DEBUG: Processing valve data: {valve_data}")
+
+                    # First try to find by ID exactly as provided
+                    valve = None
                     if valve_id and valve_id in existing_valves:
-                        valve = existing_valves.pop(valve_id)
-                        for attr, value in valve_data.items():
+                        valve = existing_valves[valve_id]
+                        print(f"DEBUG: Found valve by ID {valve_id}")
+
+                    # Then try to find by external ID if not found by primary ID
+                    elif valve_external_id and valve_external_id in existing_valves_by_valve_id:
+                        valve = existing_valves_by_valve_id[valve_external_id]
+                        print(f"DEBUG: Found valve by external ID {valve_external_id}, actual DB ID: {valve.id}")
+
+                    # If valve found by any method, update it
+                    if valve:
+                        processed_valve_ids.append(valve.id)
+                        # Update the existing valve - exclude 'id' to avoid updating primary key
+                        valve_update_data = {k: v for k, v in valve_data.items() if k != 'id'}
+                        print(f"DEBUG: Updating valve {valve.id} with data: {valve_update_data}")
+                        for attr, value in valve_update_data.items():
                             setattr(valve, attr, value)
                         valve.save()
                     else:
-                        Valve.objects.create(motor=instance, **valve_data)
-                for valve in existing_valves.values():
-                    valve.delete()
+                        # Create new valve if not found
+                        new_valve_data = valve_data.copy()
+                        if 'id' in new_valve_data:
+                            del new_valve_data['id']  # Remove id if present for creation
+                        print(f"DEBUG: Creating new valve with data: {new_valve_data}")
+                        new_valve = Valve.objects.create(motor=instance, **new_valve_data)
+                        processed_valve_ids.append(new_valve.id)
+
+                # Handle deletion of valves not in the update
+                for valve_id, valve in existing_valves.items():
+                    if valve_id not in processed_valve_ids:
+                        print(f"DEBUG: Deleting valve {valve_id} as it's not in update data")
+                        valve.delete()
+
+            # Ensure motor state is consistent with valves
+            if instance.is_active and not instance.valves.filter(is_active=True).exists():
+                if instance.valves.exists():
+                    first_valve = instance.valves.first()
+                    first_valve.is_active = True
+                    first_valve.save()
+                else:
+                    instance.is_active = False
+                    instance.save(update_fields=['is_active'])
 
             return instance
         except DjangoValidationError as e:
@@ -220,7 +295,6 @@ class MotorSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'detail': f'Error updating motor: {str(e)}'
             })
-
 
 class FarmSerializer(serializers.ModelSerializer):
     motors = MotorSerializer(many=True, required=False)
@@ -262,10 +336,18 @@ class FarmSerializer(serializers.ModelSerializer):
             farm = Farm.objects.create(**validated_data)
 
             for motor_data in motors_data:
+                motor_data = motor_data.copy()
+                if 'id' in motor_data:
+                    del motor_data['id']  # Remove id if present for creation
+
                 motor_data['farm'] = farm
                 valves_data = motor_data.pop('valves', [])
                 motor = Motor.objects.create(**motor_data)
+
                 for valve_data in valves_data:
+                    valve_data = valve_data.copy()
+                    if 'id' in valve_data:
+                        del valve_data['id']  # Remove id if present for creation
                     Valve.objects.create(motor=motor, **valve_data)
 
             return farm
@@ -279,47 +361,115 @@ class FarmSerializer(serializers.ModelSerializer):
             })
 
     def update(self, instance, validated_data):
-        """Update existing farm"""
         try:
             motors_data = validated_data.pop('motors', None)
 
+            # Update farm attributes
             for attr, value in validated_data.items():
-                setattr(instance, attr, value)
+                if attr != 'id':  # Skip the ID field
+                    setattr(instance, attr, value)
             instance.save()
 
+            # Handle motors update if provided
             if motors_data is not None:
+                # Create a dictionary of existing motors by ID
                 existing_motors = {motor.id: motor for motor in instance.motors.all()}
+                processed_motor_ids = []
+
+                # Process each motor in the update data
                 for motor_data in motors_data:
                     motor_id = motor_data.get('id')
-                    if motor_id and motor_id in existing_motors:
-                        motor = existing_motors.pop(motor_id)
-                        valves_data = motor_data.pop('valves', None)
+                    valves_data = motor_data.pop('valves', None)
 
-                        for attr, value in motor_data.items():
+                    if motor_id and motor_id in existing_motors:
+                        # Update existing motor
+                        motor = existing_motors[motor_id]
+                        processed_motor_ids.append(motor_id)
+
+                        # Remove ID from data before updating
+                        motor_update_data = {k: v for k, v in motor_data.items() if k != 'id'}
+
+                        # Apply updates
+                        for attr, value in motor_update_data.items():
                             setattr(motor, attr, value)
                         motor.save()
 
+                        # Handle nested valves update
                         if valves_data is not None:
+                            # Debug: Print existing valves
+                            existing_valves_debug = list(motor.valves.all())
+                            print(f"DEBUG: Existing valves for motor {motor.id}: {existing_valves_debug}")
+
+                            # Get all existing valves for this motor
                             existing_valves = {valve.id: valve for valve in motor.valves.all()}
+                            # Also track by valve_id for better matching
+                            existing_valves_by_valve_id = {valve.valve_id: valve for valve in motor.valves.all() if valve.valve_id}
+
+                            processed_valve_ids = []
+
                             for valve_data in valves_data:
                                 valve_id = valve_data.get('id')
+                                valve_external_id = valve_data.get('valve_id')
+
+                                # Debug: Print valve data being processed
+                                print(f"DEBUG: Processing valve data: {valve_data}")
+
+                                # First check: Try to find by ID exactly as provided
+                                valve = None
                                 if valve_id and valve_id in existing_valves:
-                                    valve = existing_valves.pop(valve_id)
-                                    for attr, value in valve_data.items():
+                                    valve = existing_valves[valve_id]
+                                    print(f"DEBUG: Found valve by ID {valve_id}")
+
+                                # Second check: If not found by ID and has external ID, try to match by external ID
+                                elif valve_external_id and valve_external_id in existing_valves_by_valve_id:
+                                    valve = existing_valves_by_valve_id[valve_external_id]
+                                    print(f"DEBUG: Found valve by external ID {valve_external_id}, actual DB ID: {valve.id}")
+                                    # Don't update the valve_data here - we want to keep using the provided ID
+
+                                # If valve found by any method, update it
+                                if valve:
+                                    processed_valve_ids.append(valve.id)
+                                    # Update the existing valve - exclude 'id' to avoid updating primary key
+                                    valve_update_data = {k: v for k, v in valve_data.items() if k != 'id'}
+                                    print(f"DEBUG: Updating valve {valve.id} with data: {valve_update_data}")
+                                    for attr, value in valve_update_data.items():
                                         setattr(valve, attr, value)
                                     valve.save()
                                 else:
-                                    Valve.objects.create(motor=motor, **valve_data)
-                            for valve in existing_valves.values():
-                                valve.delete()
+                                    # Create new valve if not found
+                                    new_valve_data = valve_data.copy()
+                                    if 'id' in new_valve_data:
+                                        del new_valve_data['id']  # Remove id if present for creation
+                                    print(f"DEBUG: Creating new valve with data: {new_valve_data}")
+                                    new_valve = Valve.objects.create(motor=motor, **new_valve_data)
+                                    processed_valve_ids.append(new_valve.id)
+
+                            # Handle deletion of valves not in the update
+                            for valve_id, valve in existing_valves.items():
+                                if valve_id not in processed_valve_ids:
+                                    print(f"DEBUG: Deleting valve {valve_id} as it's not in update data")
+                                    valve.delete()
                     else:
-                        motor_data['farm'] = instance
-                        valves_data = motor_data.pop('valves', [])
-                        motor = Motor.objects.create(**motor_data)
-                        for valve_data in valves_data:
-                            Valve.objects.create(motor=motor, **valve_data)
-                for motor in existing_motors.values():
-                    motor.delete()
+                        # Create new motor without ID from data
+                        new_motor_data = motor_data.copy()
+                        if 'id' in new_motor_data:
+                            del new_motor_data['id']  # Remove id if present for creation
+
+                        new_motor = Motor.objects.create(farm=instance, **new_motor_data)
+                        processed_motor_ids.append(new_motor.id)
+
+                        # Create valves for the new motor if provided
+                        if valves_data:
+                            for valve_data in valves_data:
+                                valve_data = valve_data.copy()
+                                if 'id' in valve_data:
+                                    del valve_data['id']  # Remove id if present for creation
+                                Valve.objects.create(motor=new_motor, **valve_data)
+
+                # Handle deletion of motors not in the update
+                for motor_id, motor in existing_motors.items():
+                    if motor_id not in processed_motor_ids:
+                        motor.delete()
 
             return instance
         except DjangoValidationError as e:
@@ -330,3 +480,25 @@ class FarmSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'detail': f'Error updating farm: {str(e)}'
             })
+
+
+class MotorValveSerializer(serializers.ModelSerializer):
+    """Serializer for Motor with nested Valves"""
+    valves = serializers.SerializerMethodField()
+    is_active = serializers.SerializerMethodField()
+    farm_name = serializers.CharField(source='farm.name', read_only=True)
+
+    class Meta:
+        model = Motor
+        fields = ['id', 'UIN', 'is_active', 'farm_name', 'motor_type', 'valve_count', 'valves']
+
+    def get_valves(self, obj):
+        return [{
+            'id': valve.id,
+            'valve_id': valve.valve_id,
+            'name': valve.name,
+            'is_active': 1 if valve.is_active else 0
+        } for valve in obj.valves.all()]
+
+    def get_is_active(self, obj):
+        return 1 if obj.is_active else 0

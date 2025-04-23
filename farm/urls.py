@@ -4,8 +4,8 @@ from .views import (
     FarmListCreateView, FarmDetailView,
     MotorListCreateView, MotorDetailView,
     ValveListCreateView, ValveDetailView,
-    UserFarmsView,  FarmMotorUpdateView, FarmMotorValveUpdateView,
-    FarmMotorsListView  # ✅ Add this new view for listing motors in a farm
+    UserFarmsView, FarmMotorUpdateView, FarmMotorValveUpdateView,
+    FarmMotorsListView, MotorValveView  # ✅ Add this new view for listing motors in a farm
 )
 
 urlpatterns = [
@@ -25,7 +25,7 @@ urlpatterns = [
     path("farm-management/", TemplateView.as_view(template_name='create_farm.html'), name='create_farm_page'),
 
 
-
+    path('motor-valve/', MotorValveView.as_view(), name='motor-list'),
 
     # User Farms
     path('my-farms/', UserFarmsView.as_view(), name='user-farms'),
