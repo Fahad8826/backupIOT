@@ -28,6 +28,11 @@ class MotorListCreateView(generics.ListCreateAPIView):
 class MotorDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Motor.objects.all()
     serializer_class = MotorSerializer
+    lookup_field = 'UIN'  # Change the lookup field to UIN
+
+    def get_queryset(self):
+        # Optional: Add optimized query
+        return Motor.objects.all().select_related('farm').prefetch_related('valves')
 
     def patch(self, request, *args, **kwargs):
         """
@@ -47,7 +52,6 @@ class MotorDetailView(generics.RetrieveUpdateDestroyAPIView):
         """
         serializer.save()
 
-
 # ---------------- Valve Views ----------------
 class ValveListCreateView(generics.ListCreateAPIView):
     queryset = Valve.objects.all()
@@ -64,7 +68,7 @@ class MotorValveView(generics.ListAPIView, generics.UpdateAPIView):
     serializer_class = MotorValveSerializer
     authentication_classes = []  # No authentication
     permission_classes = []  # No permission checks
-    lookup_field = 'id'  # For update by ID
+    lookup_field = 'UIN'  # For update by ID
 
     def get_queryset(self):
         # Optimize queries for all motors
@@ -202,6 +206,58 @@ class MotorValveView(generics.ListAPIView, generics.UpdateAPIView):
             )
 
 
+class MotorValveUpdate(generics.RetrieveUpdateAPIView):
+    queryset = Valve.objects.all()
+    serializer_class = ValveSerializer
+
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        """Retrieve a specific valve belonging to a motor identified by UIN"""
+        motor_uin = self.kwargs['UIN']  # Using UIN as the parameter name to match the model
+        valve_id = self.kwargs['valve_id']
+
+        # First get the motor by UIN
+        motor = get_object_or_404(Motor, UIN=motor_uin)
+
+        # Then get the valve associated with that motor
+        return get_object_or_404(Valve, valve_id=valve_id, motor=motor)
+
+    def update(self, request, *args, **kwargs):
+        """Update the valve properties (primarily is_active)"""
+        valve = self.get_object()
+
+        if 'is_active' in request.data:
+            try:
+                # Convert to boolean for consistent handling
+                is_active = bool(int(request.data.get('is_active')))
+                valve.is_active = is_active
+            except (ValueError, TypeError):
+                return Response(
+                    {'detail': 'is_active must be 0 or 1'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Update other fields if needed
+        if 'name' in request.data:
+            valve.name = request.data.get('name')
+
+        if 'valve_id' in request.data:
+            valve.valve_id = request.data.get('valve_id')
+
+        valve.save()
+
+        # If valve was deactivated and it was the only active valve, deactivate the motor as well
+        motor = valve.motor
+        if not valve.is_active and not motor.valves.filter(is_active=True).exists() and motor.is_active:
+            motor.is_active = False
+            motor.save()
+
+        return Response({
+            "message": "Valve updated successfully",
+            "valve": self.serializer_class(valve).data
+        })
+
 
 # ---------------- User's Farms View ----------------
 class UserFarmsView(APIView):
@@ -238,7 +294,7 @@ class FarmMotorUpdateView(generics.RetrieveUpdateAPIView):
         """Allows users to update all fields of a motor"""
         partial = kwargs.pop('partial', True)
         instance = self.get_object()
-        
+
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
@@ -250,7 +306,7 @@ class FarmMotorUpdateView(generics.RetrieveUpdateAPIView):
 class FarmMotorValveUpdateView(generics.RetrieveUpdateAPIView):
     queryset = Valve.objects.all()
     serializer_class = ValveSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+
 
     def get_object(self):
         """Retrieve a specific valve belonging to a motor and farm"""

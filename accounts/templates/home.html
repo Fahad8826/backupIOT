@@ -3294,7 +3294,8 @@ function toggleMotor(motorId, currentStatus) {
             getFarmData(); // Refresh farm data
         },
         error: function(xhr) {
-            showNotification('Error toggling motor: activate atleast 1 valve');
+            const errorMsg = xhr.responseJSON?.detail || 'Error toggling motor';
+            showNotification(errorMsg, 'error');
             console.error('Error toggling motor:', xhr);
         }
     });
@@ -3325,7 +3326,6 @@ function toggleValve(valveId, currentStatus) {
     });
 }
 
-
 function editMotor(motorId, farmId) {
     $.ajax({
         url: `${API_BASE_URL}motors/${motorId}/`,
@@ -3334,7 +3334,7 @@ function editMotor(motorId, farmId) {
             editFarm(farmId);
             setTimeout(() => {
                 for (let i = 1; i <= motorCount; i++) {
-                    if ($(`#motor-id-${i}`).val() == motorId) {
+                    if ($(`#motor-UIN-${i}`).val() == motor.UIN) {
                         $(`#UIN-${i}`).val(motor.UIN);
                         $(`#motor-type-${i}`).val(motor.motor_type);
                         $(`#valve-count-${i}`).val(motor.valve_count);
@@ -3360,7 +3360,7 @@ function editMotor(motorId, farmId) {
     });
 }
 
-
+// Function to delete a motor
 function deleteMotor(motorId, farmId) {
     if (confirm('Are you sure you want to delete this motor?')) {
         $.ajax({
@@ -3380,6 +3380,60 @@ function deleteMotor(motorId, farmId) {
         });
     }
 }
+<!--function editMotor(motorId, farmId) {-->
+<!--    $.ajax({-->
+<!--        url: `${API_BASE_URL}motors/${motorId}/`,-->
+<!--        method: 'GET',-->
+<!--        success: function(motor) {-->
+<!--            editFarm(farmId);-->
+<!--            setTimeout(() => {-->
+<!--                for (let i = 1; i <= motorCount; i++) {-->
+<!--                    if ($(`#motor-id-${i}`).val() == motorId) {-->
+<!--                        $(`#UIN-${i}`).val(motor.UIN);-->
+<!--                        $(`#motor-type-${i}`).val(motor.motor_type);-->
+<!--                        $(`#valve-count-${i}`).val(motor.valve_count);-->
+<!--                        updateValveInputs(i);-->
+<!--                        // Populate valve inputs-->
+<!--                        motor.valves.forEach((valve, index) => {-->
+<!--                            $(`#valve-name-${i}-${index + 1}`).val(valve.name);-->
+<!--                            $(`#valve-id-${i}-${index + 1}`).val(valve.valve_id);-->
+<!--                            // Add the database ID for each valve-->
+<!--                            $(`#valve-db-id-${i}-${index + 1}`).val(valve.id);-->
+<!--                            // Trigger validation for existing valve_id-->
+<!--                            checkValveId(i, index + 1, valve.id);-->
+<!--                        });-->
+<!--                        break;-->
+<!--                    }-->
+<!--                }-->
+<!--            }, 300);-->
+<!--        },-->
+<!--        error: function(xhr) {-->
+<!--            showNotification('Error loading motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--            console.error('Error loading motor:', xhr);-->
+<!--        }-->
+<!--    });-->
+<!--}-->
+
+
+<!--function deleteMotor(motorId, farmId) {-->
+<!--    if (confirm('Are you sure you want to delete this motor?')) {-->
+<!--        $.ajax({-->
+<!--            url: `${API_BASE_URL}motors/${motorId}/`,-->
+<!--            method: 'DELETE',-->
+<!--            success: function() {-->
+<!--                showNotification('Motor deleted successfully');-->
+<!--                getFarmData(); // Refresh farm details-->
+<!--                if ($('#farm-edit-id').val() == farmId) {-->
+<!--                    editFarm(farmId); // Refresh farm edit form if open-->
+<!--                }-->
+<!--            },-->
+<!--            error: function(xhr) {-->
+<!--                showNotification('Error deleting motor: ' + (xhr.responseJSON?.detail || xhr.statusText), 'error');-->
+<!--                console.error('Error deleting motor:', xhr);-->
+<!--            }-->
+<!--        });-->
+<!--    }-->
+<!--}-->
 
 function loadDashboardData() {
     $.ajax({
