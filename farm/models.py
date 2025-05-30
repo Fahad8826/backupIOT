@@ -2,11 +2,14 @@
 from django.db import models
 from accounts.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+
 
 class Farm(models.Model):
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=200)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='farms')
+    created_at = models.DateTimeField(default=timezone.now)
     def __str__(self):
         return self.name
 

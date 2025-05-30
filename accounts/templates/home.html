@@ -864,7 +864,7 @@ body {
                             <th>First Name</th>
                             <th>Last Name</th>
                             <th>Role</th>
-                            <th>Active</th>
+<!--                            <th>Active</th>-->
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -912,10 +912,10 @@ body {
                                 <option value="guest">Guest</option>
                             </select>
                         </div>
-                        <div>
-                            <label for="isActive">Active</label>
-                            <input type="checkbox" id="isActive" checked>
-                        </div>
+<!--                        <div>-->
+<!--                            <label for="isActive">Active</label>-->
+<!--                            <input type="checkbox" id="isActive" checked>-->
+<!--                        </div>-->
                         <div>
                             <label for="phoneNumber">Phone Number</label>
                             <input type="tel" id="phoneNumber">
@@ -1449,22 +1449,7 @@ function fetchFarms(page) {
             if (farms.length === 0) {
                 $("#farmTable").html("<tr><td colspan='6' class='text-center'>No farms found</td></tr>");
             } else {
-                // farms.forEach(farm => {
-                //     $("#farmTable").append(`
-                //         <tr>
-                            
-                //             <td>${farm.name || 'Unnamed'}</td>
-                //             <td>${farm.location || 'Unknown'}</td>
-                //             <td>${farm.owner_name || farm.owner || 'Not assigned'}</td>
-                //             <td>${farm.motors ? farm.motors.length : 0}</td>
-                //             <td>
-                //                 <button onclick="editFarm(${farm.id})" class="btn-primary">Edit</button>
-                //                 <button onclick="deleteFarm(${farm.id})" class="btn-danger">Delete</button>
-                //                 <button onclick="viewFarmDetails(${farm.id})" class="btn-primary">View</button>
-                //             </td>
-                //         </tr>
-                //     `);
-                // });
+
 
                 farms.forEach((farm, index) => {
                     $("#farmTable").append(`
@@ -2024,7 +2009,7 @@ function fetchUsers(page) {
                             <td>${user.first_name || ''}</td>
                             <td>${user.last_name || ''}</td>
                             <td>${user.role || 'user'}</td>
-                            <td>${user.is_active ? 'Active' : 'Inactive'}</td>
+
                             <td>
                                 <button onclick="fetchUserDetails(${user.id})" class="btn-primary">Edit</button>
                                 <button onclick="showDeleteConfirmation(${user.id})" class="btn-danger">Delete</button>
@@ -2089,29 +2074,64 @@ function showDeleteConfirmation(userId) {
     }
 }
 
-function createUser(userData) {
-    $.ajax({
-        url: USER_API_URL,
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(userData),
-        headers: { 'X-CSRFToken': getCsrfToken() },
-        success: function() {
-            showNotification('User created successfully');
-            resetUserForm();
-            showSection('user-list');
 
-            // Add a small delay before fetching users
-            setTimeout(function() {
-                fetchUsers(currentUserPage);
-            }, 100);
-        },
-        error: function(xhr) {
-            showNotification('Failed to create user: ' + xhr.statusText, 'error');
-            console.error('Error creating user:', xhr);
-        }
-    });
+
+function createUser(userData) {
+    try {
+        $.ajax({
+            url: USER_API_URL,
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(userData),
+            headers: { 'X-CSRFToken': getCsrfToken() },
+            success: function () {
+                showNotification('✅ User created successfully', 'success');
+                resetUserForm();
+                showSection('user-list');
+                setTimeout(() => fetchUsers(currentUserPage), 100);
+            },
+            error: function (xhr) {
+                let errorMessage = '❌ Failed to create user.';
+
+                // Handle specific HTTP status codes
+                switch (xhr.status) {
+                    case 400:
+                        // Usually means validation error
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response && typeof response === 'object') {
+                                const messages = Object.entries(response)
+                                    .map(([field, msg]) => `${field}: ${Array.isArray(msg) ? msg.join(', ') : msg}`)
+                                    .join('\n');
+                                errorMessage = `Validation Error:\n${messages}`;
+                            }
+                        } catch (e) {
+                            errorMessage = `Invalid data submitted.`;
+                        }
+                        break;
+                    case 401:
+                        errorMessage = 'Unauthorized: Please login again.';
+                        break;
+                    case 403:
+                        errorMessage = 'Forbidden: You don’t have permission to do this.';
+                        break;
+                    case 500:
+                        errorMessage = 'Server error. Please try again later.';
+                        break;
+                    default:
+                        errorMessage = `Unexpected error: ${xhr.statusText || 'Unknown error'}`;
+                }
+
+                showNotification(errorMessage, 'error');
+                console.error('Error response:', xhr);
+            }
+        });
+    } catch (ex) {
+        console.error('Exception while creating user:', ex);
+        showNotification('⚠️ Unexpected error occurred. Please try again later.', 'error');
+    }
 }
+
 
 function updateUser(userId, userData) {
     $.ajax({
@@ -2121,7 +2141,7 @@ function updateUser(userId, userData) {
         data: JSON.stringify(userData),
         headers: { 'X-CSRFToken': getCsrfToken() },
         success: function() {
-            showNotification('User updated successfully');
+            showNotification('User updated successfully','error');
             resetUserForm();
             showSection('user-list');
 

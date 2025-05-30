@@ -302,7 +302,7 @@ class FarmSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Farm
-        fields = ['id', 'name', 'location', 'owner', 'motors']
+        fields = ['id', 'name', 'location', 'owner', 'motors','created_at']
         extra_kwargs = {
             'name': {'required': True},
             'location': {'required': True},

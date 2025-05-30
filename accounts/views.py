@@ -236,7 +236,7 @@ User = get_user_model()
 
 
 class UserListCreateView(generics.ListCreateAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-created_at')
     serializer_class = UserSerializer
     permission_classes = [AllowAny]  # Allow anyone to create users
 

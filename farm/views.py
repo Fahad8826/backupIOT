@@ -10,7 +10,7 @@ from .serializers import FarmSerializer, MotorSerializer, ValveSerializer, Motor
 
 # ---------------- Farm Views ----------------
 class FarmListCreateView(generics.ListCreateAPIView):
-    queryset = Farm.objects.all()
+    queryset = Farm.objects.all().order_by('-created_at')
     serializer_class = FarmSerializer
 
 
