@@ -734,6 +734,7 @@ body {
     <i class="fas fa-sync-alt"></i>
 </button>
         </div>
+
     </div>
 
     <div id="content" class="content">
@@ -815,6 +816,7 @@ body {
                     <thead>
                         <tr>
                             <th>No</th>
+                            <th>FarmID</th>
                             <th>Farm Name</th>
                             <th>Location</th>
                             <th>OwnerID</th>
@@ -840,7 +842,7 @@ body {
             <h2>Farm Details</h2>
             <div class="form-container">
                 <div class="flex gap-4 mb-4">
-                    <input type="number" id="farm-id" placeholder="Farm ID" class="flex-1">
+                    <input type="text" id="farm-id" placeholder="Farm ID" class="flex-1">
                     <button onclick="getFarmData()" class="btn btn-primary">Get Farm Data</button>
                 </div>
                 <div id="farm-data"></div>
@@ -954,7 +956,7 @@ body {
 
 const API_BASE_URL = 'http://127.0.0.1:8000/farm/';
 const USER_API_URL = 'http://127.0.0.1:8000/users/';
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 20;
 
 $(document).ready(function() {
     const token = localStorage.getItem('adminToken');
@@ -1455,6 +1457,7 @@ function fetchFarms(page) {
                     $("#farmTable").append(`
                         <tr>
                             <td>${index + 1}</td> <!-- This adds the serial number -->
+                            <td>${farm.id || 'No Unknown'}</td>
                             <td>${farm.name || 'Unnamed'}</td>
                             <td>${farm.location || 'Unknown'}</td>
                             <td>${farm.owner_name || farm.owner || 'Not assigned'}</td>
@@ -1572,10 +1575,10 @@ function deleteFarm(farmId) {
     }
 }
 
-function viewFarmDetails(farmId) {
-    $('#farm-id').val(farmId);
-    getFarmData();
-    showSection('farm-details');
+function viewFarmDetails(farmId, farmName) {
+    $('#farm-id').val(farmId);         // Set the farm ID in the input
+    getFarmData();                     // Call the data fetcher
+    showSection('farm-details');       // Show the section
 }
 
 function getFarmData() {
@@ -1696,7 +1699,9 @@ function displayRecentFarms(farms) {
 }
 
 function displayFarmData(data) {
+
     let html = `
+
         <h3 class="text-lg font-semibold mb-2">${data.name || 'Unnamed Farm'} - ${data.location || 'Unknown Location'}</h3>
         <p class="text-sm text-gray-600 mb-4">Owner: ${data.owner_name || data.owner || 'Not assigned'}</p>
         <h4 class="text-md font-semibold mt-4 mb-2">Motors and Valves:</h4>
@@ -1727,8 +1732,9 @@ function displayFarmData(data) {
                     html += `
                         <div class="flex items-center justify-between gap-3 mt-2 py-2 border-t border-gray-200">
                             <span class="text-sm text-gray-600 flex-1 truncate">
-                                ${valve.name || `Valve ${valve.id}`} (Valve ID: ${valve.valve_id || 'N/A'}, ID: ${valve.id}) -
-                                Status: <span class="${valve.is_active ? 'text-green-600' : 'text-red-600'}">${valve.is_active ? 'Active' : 'Inactive'}</span>
+                                ${valve.name} (Valve ID: ${valve.valve_id || 'N/A'}, ID: ${valve.id}) -
+                                IsActive: <span class="${valve.is_active ? 'text-green-600' : 'text-red-600'}">${valve.is_active ? 'Active' : 'Inactive'}</span>
+                                 | StatusFromDevice: <span class="${valve.status ? 'text-green-600' : 'text-red-600'}">${valve.status ? 'Active' : 'Inactive'}</span>
                             </span>
                             <button onclick="toggleValve(${valve.id}, ${valve.is_active ? 1 : 0})"
                                     class="toggle-valve-btn ${valve.is_active ? 'btn-active' : 'btn-inactive'} text-sm py-1 px-3 fixed-width-btn"

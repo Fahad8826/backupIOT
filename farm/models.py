@@ -50,6 +50,7 @@ class Valve(models.Model):
     motor = models.ForeignKey(Motor, on_delete=models.CASCADE, related_name='valves')
     name = models.CharField(max_length=50)
     is_active = models.BooleanField(default=False)
+    status =  models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.name} - {self.motor}"

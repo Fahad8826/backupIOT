@@ -6,15 +6,92 @@ from accounts.models import User
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 
+# class ValveSerializer(serializers.ModelSerializer):
+#     id = serializers.IntegerField(required=False)  # Make ID optional but pass it when present
+#
+#     class Meta:
+#         model = Valve
+#         fields = ['id', 'name', 'is_active','valve_id',]
+#         extra_kwargs = {
+#             'name': {'required': False},
+#             'is_active': {'required': True}
+#         }
+#
+#     def validate(self, attrs):
+#         """Validate valve-specific rules"""
+#         try:
+#             name = attrs.get('name', '')
+#             if name and len(name.strip()) < 1:
+#                 raise serializers.ValidationError({
+#                     'name': 'Valve name cannot be empty if provided'
+#                 })
+#             return attrs
+#         except Exception as e:
+#             raise serializers.ValidationError({
+#                 'detail': f'Error validating valve: {str(e)}'
+#             })
+#
+#     def to_representation(self, instance):
+#         """Convert boolean to integer for API response"""
+#         try:
+#             ret = super().to_representation(instance)
+#             ret['is_active'] = 1 if instance.is_active else 0
+#             return ret
+#         except Exception as e:
+#             raise serializers.ValidationError({
+#                 'detail': f'Error in representation: {str(e)}'
+#             })
+#
+#     def to_internal_value(self, data):
+#         """Convert incoming integer to boolean"""
+#         try:
+#             if not isinstance(data, dict):
+#                 raise serializers.ValidationError({
+#                     'detail': 'Invalid valve data format'
+#                 })
+#
+#             data = data.copy()
+#             if 'is_active' in data:
+#                 try:
+#                     data['is_active'] = bool(int(data['is_active']))
+#                 except (ValueError, TypeError):
+#                     raise serializers.ValidationError({
+#                         'is_active': 'Must be 0 or 1'
+#                     })
+#             return super().to_internal_value(data)
+#         except Exception as e:
+#             raise serializers.ValidationError({
+#                 'detail': f'Error processing valve data: {str(e)}'
+#             })
+#
+#     def update(self, instance, validated_data):
+#         """Update existing valve"""
+#         try:
+#             # Update valve attributes
+#             for attr, value in validated_data.items():
+#                 if attr != 'id':  # Skip the ID field
+#                     setattr(instance, attr, value)
+#             instance.save()
+#             return instance
+#         except DjangoValidationError as e:
+#             raise serializers.ValidationError({
+#                 'detail': str(e)
+#             })
+#         except Exception as e:
+#             raise serializers.ValidationError({
+#                 'detail': f'Error updating valve: {str(e)}'
+#             })
+
 class ValveSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)  # Make ID optional but pass it when present
 
     class Meta:
         model = Valve
-        fields = ['id', 'name', 'is_active','valve_id']
+        fields = ['id', 'name', 'is_active', 'status', 'valve_id']
         extra_kwargs = {
             'name': {'required': False},
-            'is_active': {'required': True}
+            'is_active': {'required': True},
+            'status': {'required': False}
         }
 
     def validate(self, attrs):
@@ -32,10 +109,11 @@ class ValveSerializer(serializers.ModelSerializer):
             })
 
     def to_representation(self, instance):
-        """Convert boolean to integer for API response"""
+        """Convert booleans to integers for API response"""
         try:
             ret = super().to_representation(instance)
             ret['is_active'] = 1 if instance.is_active else 0
+            ret['status'] = 1 if instance.status else 0
             return ret
         except Exception as e:
             raise serializers.ValidationError({
@@ -43,7 +121,7 @@ class ValveSerializer(serializers.ModelSerializer):
             })
 
     def to_internal_value(self, data):
-        """Convert incoming integer to boolean"""
+        """Convert incoming 0/1 integers to booleans"""
         try:
             if not isinstance(data, dict):
                 raise serializers.ValidationError({
@@ -51,13 +129,15 @@ class ValveSerializer(serializers.ModelSerializer):
                 })
 
             data = data.copy()
-            if 'is_active' in data:
-                try:
-                    data['is_active'] = bool(int(data['is_active']))
-                except (ValueError, TypeError):
-                    raise serializers.ValidationError({
-                        'is_active': 'Must be 0 or 1'
-                    })
+            for field in ['is_active', 'status']:
+                if field in data:
+                    try:
+                        data[field] = bool(int(data[field]))
+                    except (ValueError, TypeError):
+                        raise serializers.ValidationError({
+                            field: 'Must be 0 or 1'
+                        })
+
             return super().to_internal_value(data)
         except Exception as e:
             raise serializers.ValidationError({
@@ -67,9 +147,8 @@ class ValveSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update existing valve"""
         try:
-            # Update valve attributes
             for attr, value in validated_data.items():
-                if attr != 'id':  # Skip the ID field
+                if attr != 'id':  # Skip ID field
                     setattr(instance, attr, value)
             instance.save()
             return instance
@@ -81,7 +160,6 @@ class ValveSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 'detail': f'Error updating valve: {str(e)}'
             })
-
 
 class MotorSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)  # Make ID optional but pass it when present
